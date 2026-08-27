@@ -1,9 +1,9 @@
 """데이터 접근 계층.
 
-dataset_1의 스타 스키마(차원 2 + 팩트 4)를 읽어, 품질/생산/시장/통합 에이전트가
-공통으로 쓰는 조회·조인 함수를 제공한다. MCP 서버(mymcp/server.py)는 이 모듈의
-함수만 호출한다 — 데이터 로직과 프로토콜 계층을 분리해두면 나중에 실제 MCP SDK로
-전송 계층만 바꿔도 이 파일은 그대로 재사용할 수 있다.
+dataset_2(반도체 DS 수율·공정설계 & DX 스마트팩토리 데이터 레이크, 차원 3 + 팩트 3)를
+읽어, FDC/수율/KPI/통합 에이전트가 공통으로 쓰는 조회·조인 함수를 제공한다. MCP
+서버(mymcp/server.py)는 이 모듈의 함수만 호출한다 — 데이터 로직과 프로토콜 계층을
+분리해두면 나중에 실제 MCP SDK로 전송 계층만 바꿔도 이 파일은 그대로 재사용할 수 있다.
 """
 from __future__ import annotations
 
@@ -17,23 +17,23 @@ import pandas as pd
 from insight_agent.config import DATASET_DIR
 
 TABLE_FILES = {
-    "dim_company_product": "dim_company_product.csv",
-    "dim_equipment": "dim_equipment.csv",
-    "fact_production_run": "fact_production_run.csv",
-    "fact_equipment_sensor": "fact_equipment_sensor.csv",
-    "fact_quality_defect": "fact_quality_defect.csv",
-    "fact_market_sales": "fact_market_sales.csv",
+    "dim_ai_automation_role": "dim_ai_automation_role.csv",
+    "dim_process_design": "dim_process_design.csv",
+    "dim_semicon_dx_architecture": "dim_semicon_dx_architecture.csv",
+    "fact_wafer_lot_yield": "fact_wafer_lot_yield.csv",
+    "fact_fdc_chamber_sensor": "fact_fdc_chamber_sensor.csv",
+    "fact_dx_smart_factory_kpi": "fact_dx_smart_factory_kpi.csv",
 }
 
 
 @dataclass
 class Tables:
-    dim_company_product: pd.DataFrame
-    dim_equipment: pd.DataFrame
-    fact_production_run: pd.DataFrame
-    fact_equipment_sensor: pd.DataFrame
-    fact_quality_defect: pd.DataFrame
-    fact_market_sales: pd.DataFrame
+    dim_ai_automation_role: pd.DataFrame
+    dim_process_design: pd.DataFrame
+    dim_semicon_dx_architecture: pd.DataFrame
+    fact_wafer_lot_yield: pd.DataFrame
+    fact_fdc_chamber_sensor: pd.DataFrame
+    fact_dx_smart_factory_kpi: pd.DataFrame
 
 
 def load_tables(data_dir: Path | str = DATASET_DIR) -> Tables:
@@ -52,107 +52,124 @@ def df_to_records(df: pd.DataFrame) -> list[dict]:
     return json.loads(df.to_json(orient="records", force_ascii=False))
 
 
-def get_production_anomalies(
+def get_fdc_anomalies(
     tables: Tables,
-    factory_code: Optional[str] = None,
-    min_oee_pct: float = 90.0,
+    process_id: Optional[str] = None,
+    chamber_id: Optional[str] = None,
+    max_vm_error_pct: float = 1.5,
 ) -> pd.DataFrame:
-    """OEE가 임계치 미만이거나 설비 센서 anomaly_flag가 발생한 생산 실행 목록."""
-    runs = tables.fact_production_run
-    sensor_anomaly_runs = set(
-        tables.fact_equipment_sensor.loc[
-            tables.fact_equipment_sensor["anomaly_flag"] == 1, "run_id"
-        ]
-    )
-    mask = (runs["oee_pct"] < min_oee_pct) | runs["run_id"].isin(sensor_anomaly_runs)
-    if factory_code:
-        mask &= runs["factory_code"] == factory_code
-    result = runs.loc[mask].copy()
-    result["has_sensor_anomaly"] = result["run_id"].isin(sensor_anomaly_runs)
-    return result.sort_values("oee_pct")
-
-
-def get_quality_defects(
-    tables: Tables,
-    severity: Optional[str] = None,
-    category: Optional[str] = None,
-) -> pd.DataFrame:
-    """불량 이력에 제품 카테고리를 조인해 필터링."""
-    defects = tables.fact_quality_defect.merge(
-        tables.dim_company_product[["product_id", "category", "company_name"]],
-        on="product_id",
+    """인터록(fdc_interlock_flag)이 발생했거나, 가상계측(VM) 예측 두께와 실측 두께의
+    오차율이 임계치를 넘는 FDC 센서 로그. 공정명/제어 AI 에이전트명을 조인해 반환한다."""
+    fdc = tables.fact_fdc_chamber_sensor.copy()
+    vm_error_pct = (fdc["actual_thickness_nm"] - fdc["vm_pred_thickness_nm"]).abs() / fdc[
+        "actual_thickness_nm"
+    ] * 100
+    fdc["vm_error_pct"] = vm_error_pct.round(3)
+    mask = (fdc["fdc_interlock_flag"] == 1) | (vm_error_pct > max_vm_error_pct)
+    if process_id:
+        mask &= fdc["process_id"] == process_id
+    if chamber_id:
+        mask &= fdc["chamber_id"] == chamber_id
+    result = fdc.loc[mask].merge(
+        tables.dim_process_design[["process_id", "process_name"]], on="process_id", how="left"
+    ).merge(
+        tables.dim_ai_automation_role[["agent_id", "agent_name"]],
+        left_on="controlling_ai_agent",
+        right_on="agent_id",
         how="left",
     )
-    if severity:
-        defects = defects[defects["severity"] == severity]
-    if category:
-        defects = defects[defects["category"] == category]
-    return defects.sort_values("inspection_datetime")
+    return result.sort_values("timestamp", ascending=False)
 
 
-def get_market_impact(
+def get_yield_defects(
     tables: Tables,
-    product_id: str,
-    region: Optional[str] = None,
+    defect_mechanism: Optional[str] = None,
+    product_node: Optional[str] = None,
 ) -> pd.DataFrame:
-    """제품 하나의 매출/점유율 추이."""
-    sales = tables.fact_market_sales[tables.fact_market_sales["product_id"] == product_id]
-    if region:
-        sales = sales[sales["region"] == region]
-    return sales.sort_values("sales_month")
+    """웨이퍼 로트 수율 이력을 결함 메커니즘/공정 노드로 필터링. 기본값은 결함이 있는
+    (major_defect_mechanism != 'None(Clean)') 로트만 반환한다."""
+    lots = tables.fact_wafer_lot_yield
+    if defect_mechanism:
+        lots = lots[lots["major_defect_mechanism"] == defect_mechanism]
+    else:
+        lots = lots[lots["major_defect_mechanism"] != "None(Clean)"]
+    if product_node:
+        lots = lots[lots["product_node"] == product_node]
+    return lots.sort_values("production_date", ascending=False)
 
 
-def build_causal_report(tables: Tables, product_id: str) -> dict:
-    """생산 이상 -> 품질 불량 -> 시장 성과를 product_id 기준으로 엮은 통합 리포트.
+def get_dx_kpi_trend(
+    tables: Tables,
+    year_month: Optional[str] = None,
+    quarter: Optional[str] = None,
+) -> pd.DataFrame:
+    """DX 스마트팩토리 월별 운영 성과(KPI) 추이를 연월/분기로 필터링해 조회한다."""
+    kpi = tables.fact_dx_smart_factory_kpi
+    if year_month:
+        kpi = kpi[kpi["year_month"] == year_month]
+    if quarter:
+        kpi = kpi[kpi["quarter"] == quarter]
+    return kpi.sort_values("year_month")
 
-    이 함수가 이 프로젝트의 핵심 가치다: 4개 팩트 테이블이 product_id/run_id로
-    이어져 있어야만 "이 불량이 저 매출 하락의 원인인가"를 한 번에 답할 수 있다.
+
+def build_causal_report(tables: Tables, lot_id: str) -> dict:
+    """FDC 설비 이상 -> 웨이퍼 수율 -> 담당 AI 에이전트를 lot_id 기준으로 엮은 통합 리포트.
+
+    이 프로젝트의 핵심 가치다: fact_fdc_chamber_sensor.lot_id로 팩트 테이블들이
+    이어져 있어야만 "이 챔버 이상이 저 로트 수율 하락의 원인인가"를 한 번에 답할 수 있다.
     """
-    product_rows = tables.dim_company_product[tables.dim_company_product["product_id"] == product_id]
-    if product_rows.empty:
-        raise ValueError(f"unknown product_id: {product_id}")
-    product = product_rows.iloc[0]
+    lot_rows = tables.fact_wafer_lot_yield[tables.fact_wafer_lot_yield["lot_id"] == lot_id]
+    if lot_rows.empty:
+        raise ValueError(f"unknown lot_id: {lot_id}")
+    lot = lot_rows.iloc[0]
 
-    runs = tables.fact_production_run[tables.fact_production_run["product_id"] == product_id]
+    fdc = tables.fact_fdc_chamber_sensor[tables.fact_fdc_chamber_sensor["lot_id"] == lot_id].copy()
+    vm_error_pct = (fdc["actual_thickness_nm"] - fdc["vm_pred_thickness_nm"]).abs() / fdc[
+        "actual_thickness_nm"
+    ] * 100 if not fdc.empty else pd.Series(dtype=float)
 
-    anomalies = get_production_anomalies(tables)
-    anomalies = anomalies[anomalies["product_id"] == product_id]
+    processes = tables.dim_process_design[
+        tables.dim_process_design["process_id"].isin(fdc["process_id"])
+    ][["process_id", "process_name", "target_cpk"]]
+    agents = tables.dim_ai_automation_role[
+        tables.dim_ai_automation_role["agent_id"].isin(fdc["controlling_ai_agent"])
+    ][["agent_id", "agent_name", "core_responsibility"]]
 
-    defects = tables.fact_quality_defect[tables.fact_quality_defect["product_id"] == product_id]
-    critical_defects = defects[defects["severity"] == "Critical"]
+    same_node = tables.fact_wafer_lot_yield[
+        tables.fact_wafer_lot_yield["product_node"] == lot["product_node"]
+    ]
 
-    market = get_market_impact(tables, product_id)
-    market_share_trend = market[["sales_month", "region", "market_share_est_pct", "revenue_krw"]]
-
-    critical_defect_types = (
-        json.loads(critical_defects["defect_type"].value_counts().to_json(force_ascii=False))
-        if not critical_defects.empty
-        else {}
-    )
+    year_month = str(lot["production_date"])[:7]
+    kpi_context = tables.fact_dx_smart_factory_kpi[
+        tables.fact_dx_smart_factory_kpi["year_month"] == year_month
+    ]
 
     return {
-        "product_id": product_id,
-        "model_name": product["model_name"],
-        "category": product["category"],
-        "company_name": product["company_name"],
-        "production_run_count": int(len(runs)),
-        "anomaly_run_count": int(len(anomalies)),
-        "defect_count": int(len(defects)),
-        "critical_defect_count": int(len(critical_defects)),
-        "critical_defect_types": critical_defect_types,
-        "market_share_trend": df_to_records(market_share_trend),
-        "latest_market_share_pct": (
-            float(market_share_trend.iloc[-1]["market_share_est_pct"])
-            if not market_share_trend.empty
-            else None
+        "lot_id": lot_id,
+        "production_date": str(lot["production_date"]),
+        "product_node": lot["product_node"],
+        "company_name": lot["company_name"],
+        "business_unit": lot["business_unit"],
+        "wafer_yield_pct": float(lot["wafer_yield_pct"]),
+        "die_yield_pct": float(lot["die_yield_pct"]),
+        "scrap_wafer_qty": int(lot["scrap_wafer_qty"]),
+        "major_defect_mechanism": lot["major_defect_mechanism"],
+        "fdc_row_count": int(len(fdc)),
+        "fdc_interlock_count": int(fdc["fdc_interlock_flag"].sum()) if not fdc.empty else 0,
+        "fdc_vm_error_anomaly_count": int((vm_error_pct > 1.5).sum()) if not fdc.empty else 0,
+        "involved_processes": df_to_records(processes),
+        "controlling_agents": df_to_records(agents),
+        "product_node_avg_die_yield_pct": (
+            round(float(same_node["die_yield_pct"].mean()), 2) if not same_node.empty else None
         ),
+        "dx_kpi_context": df_to_records(kpi_context)[0] if not kpi_context.empty else None,
     }
 
 
 def check_source_consistency(tables: Tables, xlsx_path: Path) -> list[dict]:
     """CSV로 읽은 각 테이블이 번들 xlsx 시트와 행수가 일치하는지 검증하는 하네스 가드레일.
 
-    dataset_1은 현재 CSV와 xlsx가 완전히 일치하지만, 실제 운영 데이터에서는
+    dataset_2는 현재 CSV와 xlsx가 완전히 일치하지만, 실제 운영 데이터에서는
     소스가 갈라지는 게 흔하다 -- 이 검사가 실패하면 HITL로 넘겨야 할 신호다.
     """
     import openpyxl

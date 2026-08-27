@@ -1,0 +1,3 @@
+agent_id,agent_name,core_responsibility,ai_algorithm_stack,dx_roi_impact,deployment_layer,monitoring_frequency
+AGT-F01,테스트 FDC 에이전트,이상 감지,LSTM,90% 방지,Edge AI,Real-time
+AGT-F02,테스트 APC 에이전트,편차 보정,RL,80% 향상,Edge AI,Real-time

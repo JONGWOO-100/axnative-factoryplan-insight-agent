@@ -1,8 +1,8 @@
-"""엔드투엔드 데모 -- product_id 하나를 받아 통합 에이전트를 실행하고
+"""엔드투엔드 데모 -- lot_id 하나를 받아 통합 에이전트를 실행하고
 트레이스/HITL 상태/HOTL 스냅샷까지 한 번에 만들어본다.
 
 사용법:
-    python -m insight_agent.scripts.run_pipeline --product-id PRD-1076
+    python -m insight_agent.scripts.run_pipeline --lot-id LOT-2309-50001
 """
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ from insight_agent.hotl import monitor
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--product-id", required=True)
+    parser.add_argument("--lot-id", required=True)
     args = parser.parse_args()
 
     trace = TraceLogger()
@@ -29,7 +29,7 @@ def main() -> None:
     if mismatches:
         print("CSV/xlsx 소스 불일치 발견:", mismatches)
 
-    outcome = integration_agent.run(args.product_id, trace=trace)
+    outcome = integration_agent.run(args.lot_id, trace=trace)
     print(f"상태: {outcome['status']}")
     print(json.dumps(outcome["report"], ensure_ascii=False, indent=2))
 

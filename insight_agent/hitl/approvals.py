@@ -29,7 +29,7 @@ def submit_for_approval(report: dict) -> str:
 
 
 def auto_publish(report: dict) -> str:
-    out_path = OUTPUTS_DIR / f"report_{report['product_id']}.json"
+    out_path = OUTPUTS_DIR / f"report_{report['lot_id']}.json"
     out_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     return "published"
 
@@ -44,7 +44,7 @@ def approve(approval_id: str) -> str:
         raise FileNotFoundError(approval_id)
     payload = json.loads(src.read_text(encoding="utf-8"))
     report = payload["report"]
-    (OUTPUTS_DIR / f"report_{report['product_id']}.json").write_text(
+    (OUTPUTS_DIR / f"report_{report['lot_id']}.json").write_text(
         json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     src.rename(APPROVED / src.name)

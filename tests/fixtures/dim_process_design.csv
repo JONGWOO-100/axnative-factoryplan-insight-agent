@@ -1,0 +1,3 @@
+process_id,process_code,process_name,design_technology,target_chamber_unit,critical_parameter,target_cpk,inspection_frequency
+PRC-F01,FAB-ETCH,테스트 식각 공정,Test Etch Tech,CHMB-F01,RF Power,1.5,100%
+PRC-F02,FAB-DEPO,테스트 증착 공정,Test Depo Tech,CHMB-F02,Gas Flux,1.5,100%

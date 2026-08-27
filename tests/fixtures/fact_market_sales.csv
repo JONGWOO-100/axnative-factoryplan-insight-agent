@@ -1,5 +1,0 @@
-sales_id,sales_month,year,quarter,product_id,company_name,category,region,channel,sales_volume_units,unit_price_krw,discount_rate,revenue_krw,cogs_krw,operating_profit_krw,market_share_est_pct
-SALES-F001,2024-01,2024,2024-Q1,PRD-F001,TestCore Co,모바일 (Mobile),한국 (Korea),직영 온라인몰,100,500000,0.1,45000000,30000000,15000000,20.0
-SALES-F002,2024-02,2024,2024-Q1,PRD-F001,TestCore Co,모바일 (Mobile),한국 (Korea),직영 온라인몰,90,500000,0.1,40500000,27000000,13500000,15.0
-SALES-F003,2024-01,2024,2024-Q1,PRD-F002,TestCore Co,태블릿 (Tablet),북미 (North America),글로벌 마켓플레이스,50,700000,0.05,33250000,20000000,13250000,12.0
-SALES-F004,2024-02,2024,2024-Q1,PRD-F003,NovaTest Inc,스마트 홈가전 (Home Appliances),유럽 (Europe),B2B 엔터프라이즈,30,300000,0.08,8280000,5000000,3280000,8.0

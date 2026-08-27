@@ -1,5 +1,0 @@
-run_id,run_date,year,quarter,product_id,equipment_id,factory_code,scheduled_time_min,downtime_min,operating_time_min,planned_qty,actual_qty,good_qty,defect_qty,defect_rate_pct,oee_pct,energy_consumed_kwh
-RUN-F001,2024-01-01,2024,2024-Q1,PRD-F001,EQ-F01,FAC-TEST-01,480,5,475,1000,980,970,10,1.0,96.5,100.0
-RUN-F002,2024-01-02,2024,2024-Q1,PRD-F001,EQ-F01,FAC-TEST-01,480,60,420,1000,800,750,50,5.0,82.0,110.0
-RUN-F003,2024-02-01,2024,2024-Q1,PRD-F002,EQ-F02,FAC-TEST-01,480,10,470,900,890,885,5,0.5,95.0,95.0
-RUN-F004,2024-02-02,2024,2024-Q1,PRD-F003,EQ-F02,FAC-TEST-01,480,8,472,800,790,780,10,1.2,94.0,90.0

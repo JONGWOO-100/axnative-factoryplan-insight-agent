@@ -1,0 +1,2 @@
+data_lake_id,lake_layer,dataset_name,storage_technology,standardization_protocol,retention_period_years,governance_status
+LAKE-F01,Bronze Layer,테스트 로그,Kafka,SEMI E37,2,Active

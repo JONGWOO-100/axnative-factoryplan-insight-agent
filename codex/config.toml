@@ -1,0 +1,28 @@
+# Codex CLI/Desktop에 이 프로젝트의 MCP 서버를 등록하기 위한 스니펫.
+#
+# Codex는 Claude Code의 .mcp.json 같은 "프로젝트 스코프 자동 등록" 파일이 없다
+# (2026-08 기준). 그래서 이 파일은 실행되지 않는 참고용 템플릿이며, 아래 내용을
+# 사용자의 전역 설정 파일 `~/.codex/config.toml`에 직접 병합해야 한다.
+#
+# 1. <PROJECT_DIR>를 이 저장소의 절대 경로로 바꾼다
+#    (예: /Users/you/electronics-insight-agent)
+# 2. 아래 [mcp_servers.electronics-insight] 테이블을 ~/.codex/config.toml에 추가한다
+#    (이미 다른 mcp_servers 항목이 있다면 테이블만 이어 붙이면 된다)
+# 3. Codex CLI/Desktop을 재시작하면 get_fdc_anomalies / get_yield_defects /
+#    get_dx_kpi_trend / build_causal_report / graph_query / graph_stats 6개 툴이
+#    보인다.
+#
+# AGENTS.md는 Codex CLI가 리포지토리를 열 때 자동으로 읽으므로 별도 등록이
+# 필요 없다 -- 레이어 경계·체크리스트 규칙이 Claude Code와 동일하게 적용된다.
+
+[mcp_servers.electronics-insight]
+command = "python3"
+args = ["-m", "insight_agent.mymcp.server"]
+cwd = "<PROJECT_DIR>"
+
+# 대화형 FE(insight_agent/fe)의 LLM 응답 생성은 ANTHROPIC_API_KEY 또는
+# OPENAI_API_KEY 둘 중 하나를 환경변수로 두면 자동으로 사용된다 (insight_agent/
+# agents/llm.py). 두 키 모두 없으면 결정론적 템플릿으로 동작하므로 Codex 환경에서
+# Anthropic 키가 없어도 데모 자체는 항상 끝까지 동작한다.
+[mcp_servers.electronics-insight.env]
+OPENAI_API_KEY = "<선택: Codex/OpenAI 환경이면 여기에 설정하거나 셸 환경변수로 노출>"

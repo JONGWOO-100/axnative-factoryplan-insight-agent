@@ -1,4 +1,0 @@
-product_id,company_name,company_code,category,model_name,unit_price_krw,target_margin_rate,release_year,release_quarter,lifecycle_status
-PRD-F001,TestCore Co,TC,모바일 (Mobile),TC-Alpha,500000,0.2,2024,Q1,Active
-PRD-F002,TestCore Co,TC,태블릿 (Tablet),TC-Beta,700000,0.22,2024,Q2,Active
-PRD-F003,NovaTest Inc,NV,스마트 홈가전 (Home Appliances),NV-Gamma,300000,0.18,2023,Q4,Mature

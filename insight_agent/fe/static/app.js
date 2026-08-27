@@ -1,9 +1,12 @@
-// 바닐라 JS SPA -- 빌드 도구/프레임워크 없이 4개 탭(PRD/트레이스/HITL/HOTL)을 구현한다.
+// 바닐라 JS SPA -- 빌드 도구/프레임워크 없이 6개 탭(대화형분석/대화리포트/PRD/트레이스/HITL/HOTL)을 구현한다.
 
 const state = {
-  activeTab: "prd",
+  activeTab: "chat",
   approvalStatus: "pending",
   selectedRunId: null,
+  chatSessionId: null,
+  chatPolling: false,
+  selectedReportFilename: null,
 };
 
 // ---- 공통 유틸 -----------------------------------------------------------
@@ -36,7 +39,7 @@ function escapeHtml(s) {
     .replace(/>/g, "&gt;");
 }
 
-// 아주 작은 markdown -> html 변환기. prd.md에서 쓰는 문법(#/##, 표, 목록, **, `, >, ```)만 지원한다.
+// 아주 작은 markdown -> html 변환기. prd.md/대화 리포트에서 쓰는 문법(#/##, 표, 목록, **, `, >, ```)만 지원한다.
 function renderMarkdown(md) {
   const lines = md.split("\n");
   let html = "";
@@ -111,14 +114,204 @@ function setupTabs() {
   });
 }
 
+function showTab(tab) {
+  document.querySelector(`.tab-btn[data-tab="${tab}"]`).click();
+}
+
 function onTabShown(tab) {
   if (tab === "prd") loadPrd();
   if (tab === "trace") loadRuns();
   if (tab === "hitl") loadApprovals();
   if (tab === "hotl") loadHotl();
+  if (tab === "report") loadReportList();
 }
 
-// ---- PRD 탭 ---------------------------------------------------------------
+// ---- 대화형 분석 탭 ---------------------------------------------------------
+
+// 실제 실행 순서(engine.py)와 맞춘 단계 정의: 도메인이 아닌 통합(인과) 리포트
+// 경로에서만 발생하는 ④/⑤ 단계는 fdc/yield/kpi/graph 질의에서는 의도적으로
+// pending으로 남는다 -- 가드레일-리포트 검증과 HITL 게이트는 실제로 통합
+// 리포트에만 적용되는 게이트이기 때문이다.
+const PIPELINE_STAGES = [
+  { key: "orchestrator", label: "① 오케스트레이터 (도메인 라우팅)", match: (s) => s === "pipeline.chat_turn" || s === "orchestrator.classify" },
+  { key: "graph", label: "② GraphRAG 리트리버 + 그래프 검증", match: (s) => s.startsWith("graph_agent.") || s === "harness.guardrails.validate_graph" },
+  { key: "agent", label: "③ 도메인 에이전트 (MCP 툴 호출)", match: (s) => /^(fdc_agent|yield_agent|kpi_agent|integration_agent)\./.test(s) },
+  { key: "guardrails", label: "④ 리포트 가드레일 검증", match: (s) => s === "harness.guardrails.validate_report" },
+  { key: "hitl", label: "⑤ HITL 게이트 (승인 필요 판단)", match: (s) => s.startsWith("hitl.") },
+  { key: "narrative", label: "⑥ 응답 합성 (LLM/템플릿)", match: (s) => s === "pipeline.narrative" || s === "integration_agent.narrative" },
+];
+
+function renderPipelineSkeleton() {
+  const container = document.getElementById("pipeline-viz");
+  container.innerHTML = "";
+  for (const stage of PIPELINE_STAGES) {
+    const node = el("div", { class: "pipeline-node pending", id: `pipeline-node-${stage.key}` }, [
+      el("span", { class: "pipeline-dot" }),
+      el("span", { class: "pipeline-label", text: stage.label }),
+    ]);
+    container.appendChild(node);
+  }
+}
+
+function updatePipeline(steps, isRunning) {
+  const stepNames = steps.map((s) => s.step);
+  let lastMatchedIdx = -1;
+  const matched = PIPELINE_STAGES.map((stage, idx) => {
+    const hit = stepNames.some((name) => stage.match(name));
+    if (hit) lastMatchedIdx = idx;
+    return hit;
+  });
+  PIPELINE_STAGES.forEach((stage, idx) => {
+    const node = document.getElementById(`pipeline-node-${stage.key}`);
+    if (!node) return;
+    node.classList.remove("pending", "active", "done");
+    if (!matched[idx]) { node.classList.add("pending"); return; }
+    node.classList.add(isRunning && idx === lastMatchedIdx ? "active" : "done");
+  });
+
+  const graphStep = steps.find((s) => s.step === "graph_agent.graph_query");
+  const graphBody = document.getElementById("graph-context-body");
+  if (graphStep && graphStep.output) {
+    const ctx = graphStep.output.context_text;
+    graphBody.textContent = ctx && ctx.trim() ? ctx : "(이번 질의와 매칭되는 그래프 엔터티를 찾지 못했습니다)";
+  }
+}
+
+function appendChatBubble(role, text) {
+  const messages = document.getElementById("chat-messages");
+  const bubble = el("div", { class: `chat-bubble chat-bubble-${role}` });
+  bubble.textContent = text;
+  messages.appendChild(bubble);
+  messages.scrollTop = messages.scrollHeight;
+  return bubble;
+}
+
+function renderSuggestions(questions) {
+  const container = document.getElementById("chat-suggestions");
+  container.innerHTML = "";
+  for (const q of questions || []) {
+    const chip = el("button", { type: "button", class: "suggestion-chip", text: q });
+    chip.addEventListener("click", () => sendChatMessage(q));
+    container.appendChild(chip);
+  }
+}
+
+function updateTurnCount(turnCount) {
+  document.getElementById("chat-turn-count").textContent =
+    turnCount > 0 ? `현재 ${turnCount}턴 대화 진행 중` : "대화를 시작해보세요.";
+}
+
+async function initChat() {
+  const session = await api("/api/chat/sessions", { method: "POST" });
+  state.chatSessionId = session.session_id;
+  renderPipelineSkeleton();
+  renderSuggestions(session.suggested_questions);
+  updateTurnCount(0);
+}
+
+async function saveReport() {
+  const btn = document.getElementById("chat-save-report-btn");
+  if (!state.chatSessionId) return;
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = "저장 중...";
+  try {
+    const { report_path } = await api(`/api/chat/sessions/${state.chatSessionId}/report`, { method: "POST" });
+    const link = el("button", { type: "button", class: "report-ready-link", text: `리포트가 저장되었습니다 -- 보러 가기 (${report_path.split("/").pop()})` });
+    link.addEventListener("click", () => showTab("report"));
+    document.getElementById("chat-messages").appendChild(link);
+    document.getElementById("chat-messages").scrollTop = document.getElementById("chat-messages").scrollHeight;
+  } catch (err) {
+    appendChatBubble("assistant", `리포트 저장 실패: ${err.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+async function pollTurn(runId) {
+  state.chatPolling = true;
+  const statusEl = document.getElementById("run-status");
+  while (true) {
+    let turnState, traceSteps;
+    try {
+      [turnState, traceSteps] = await Promise.all([
+        api(`/api/chat/turns/${runId}`),
+        api(`/api/runs/${runId}`).catch(() => []),
+      ]);
+    } catch (err) {
+      appendChatBubble("assistant", `오류: ${err.message}`);
+      break;
+    }
+    const running = turnState.status === "running";
+    updatePipeline(traceSteps, running);
+    if (turnState.status === "running") {
+      await new Promise((r) => setTimeout(r, 400));
+      continue;
+    }
+    if (turnState.status === "error") {
+      appendChatBubble("assistant", `오류: ${turnState.error}`);
+      break;
+    }
+    const result = turnState.result;
+    appendChatBubble("assistant", result.reply);
+    renderSuggestions(result.suggested_questions);
+    updateTurnCount(result.turn_count);
+    break;
+  }
+  state.chatPolling = false;
+}
+
+async function sendChatMessage(message) {
+  if (!message || !state.chatSessionId || state.chatPolling) return;
+  appendChatBubble("user", message);
+  document.getElementById("chat-input").value = "";
+  const { run_id } = await api(`/api/chat/sessions/${state.chatSessionId}/messages`, {
+    method: "POST",
+    body: JSON.stringify({ message }),
+  });
+  await pollTurn(run_id);
+}
+
+function setupChat() {
+  document.getElementById("chat-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const input = document.getElementById("chat-input");
+    const message = input.value.trim();
+    if (message) sendChatMessage(message);
+  });
+  document.getElementById("chat-save-report-btn").addEventListener("click", saveReport);
+}
+
+// ---- 대화 리포트 탭 ----------------------------------------------------------
+
+async function loadReportList() {
+  const items = await api("/api/chat/reports");
+  const list = document.getElementById("report-list");
+  list.innerHTML = "";
+  if (!items.length) {
+    list.appendChild(el("div", { class: "status-text", text: "아직 저장된 리포트가 없습니다. 대화형 분석 탭에서 \"리포트 저장\" 버튼을 눌러보세요." }));
+    return;
+  }
+  for (const item of items) {
+    const node = el("div", {
+      class: "list-item" + (item.filename === state.selectedReportFilename ? " active" : ""),
+      text: `${item.session_id} · ${new Date(item.modified_at * 1000).toLocaleString()}`,
+    });
+    node.addEventListener("click", async () => {
+      state.selectedReportFilename = item.filename;
+      document.querySelectorAll("#report-list .list-item").forEach((n) => n.classList.remove("active"));
+      node.classList.add("active");
+      const { markdown } = await api(`/api/chat/reports/${item.filename}`);
+      document.getElementById("report-content").innerHTML = renderMarkdown(markdown);
+    });
+    list.appendChild(node);
+  }
+}
+
+document.getElementById("report-refresh-btn").addEventListener("click", loadReportList);
+
+// ---- PRD(Day1) 탭 -----------------------------------------------------------
 
 async function loadPrd() {
   const { markdown } = await api("/api/prd");
@@ -138,7 +331,7 @@ async function loadRuns() {
   for (const run of runs) {
     const item = el("div", {
       class: "list-item" + (run.run_id === state.selectedRunId ? " active" : ""),
-      text: `${run.product_id || "(product 미상)"} · ${run.step_count}단계`,
+      text: `${run.lot_id || "(로트 미상)"} · ${run.step_count}단계`,
     });
     item.addEventListener("click", () => {
       state.selectedRunId = run.run_id;
@@ -183,12 +376,12 @@ async function loadApprovals() {
     const report = item.report;
     const tr = el("tr");
     tr.appendChild(el("td", { text: item.approval_id }));
-    tr.appendChild(el("td", { text: `${report.model_name} (${report.product_id})` }));
-    tr.appendChild(el("td", { text: report.category }));
+    tr.appendChild(el("td", { text: `${report.lot_id}` }));
+    tr.appendChild(el("td", { text: report.product_node }));
     tr.appendChild(el("td", {
-      html: `<span class="badge badge-critical">${report.critical_defect_count}건</span>`,
+      html: `<span class="badge badge-critical">${report.fdc_interlock_count}건</span>`,
     }));
-    tr.appendChild(el("td", { text: report.latest_market_share_pct != null ? `${report.latest_market_share_pct}%` : "-" }));
+    tr.appendChild(el("td", { text: report.die_yield_pct != null ? `${report.die_yield_pct}%` : "-" }));
     tr.appendChild(el("td", { text: report.narrative_summary || "-" }));
 
     const actionCell = el("td");
@@ -230,24 +423,22 @@ async function loadHotl() {
   alertBody.innerHTML = "";
   for (const a of snapshot.alerts || []) {
     const tr = el("tr");
-    tr.appendChild(el("td", { text: a.region }));
-    tr.appendChild(el("td", { text: a.category }));
+    tr.appendChild(el("td", { text: a.product_node }));
     tr.appendChild(el("td", { text: a.quarter }));
     tr.appendChild(el("td", { html: `<span class="badge badge-critical">${a.delta_pp}%p</span>` }));
     alertBody.appendChild(tr);
   }
   if (!(snapshot.alerts || []).length) {
-    alertBody.appendChild(el("tr", {}, [el("td", { colspan: "4", class: "status-text", text: "현재 알림이 없습니다." })]));
+    alertBody.appendChild(el("tr", {}, [el("td", { colspan: "3", class: "status-text", text: "현재 알림이 없습니다." })]));
   }
 
   const trendBody = document.getElementById("hotl-trend-body");
   trendBody.innerHTML = "";
   for (const t of (snapshot.trend || []).slice(-40)) {
     const tr = el("tr");
-    tr.appendChild(el("td", { text: t.region }));
-    tr.appendChild(el("td", { text: t.category }));
+    tr.appendChild(el("td", { text: t.product_node }));
     tr.appendChild(el("td", { text: t.quarter }));
-    tr.appendChild(el("td", { text: t.market_share_est_pct.toFixed(1) }));
+    tr.appendChild(el("td", { text: t.die_yield_pct.toFixed(1) }));
     trendBody.appendChild(tr);
   }
 }
@@ -257,23 +448,23 @@ document.getElementById("hotl-refresh-btn").addEventListener("click", async () =
   loadHotl();
 });
 
-// ---- 상단 바: 제품 선택 + 분석 실행 ------------------------------------------
+// ---- 상단 바: 로트 선택 + 분석 실행 (레거시 단건 실행 경로) -------------------
 
-async function loadProducts() {
-  const products = await api("/api/products");
-  const select = document.getElementById("product-select");
-  for (const p of products) {
-    select.appendChild(el("option", { value: p.product_id, text: `${p.model_name} (${p.product_id})` }));
+async function loadLots() {
+  const lots = await api("/api/lots");
+  const select = document.getElementById("lot-select");
+  for (const l of lots) {
+    select.appendChild(el("option", { value: l.lot_id, text: `${l.lot_id} (${l.product_node})` }));
   }
 }
 
 document.getElementById("run-btn").addEventListener("click", async () => {
-  const productId = document.getElementById("product-select").value;
+  const lotId = document.getElementById("lot-select").value;
   const statusEl = document.getElementById("run-status");
-  if (!productId) { statusEl.textContent = "제품을 먼저 선택하세요."; return; }
+  if (!lotId) { statusEl.textContent = "로트를 먼저 선택하세요."; return; }
   statusEl.textContent = "실행 중...";
   try {
-    const outcome = await api("/api/run", { method: "POST", body: JSON.stringify({ product_id: productId }) });
+    const outcome = await api("/api/run", { method: "POST", body: JSON.stringify({ lot_id: lotId }) });
     statusEl.textContent = `완료: ${outcome.status} (run ${outcome.run_id})`;
     if (state.activeTab === "trace") loadRuns();
     if (state.activeTab === "hitl") loadApprovals();
@@ -286,5 +477,6 @@ document.getElementById("run-btn").addEventListener("click", async () => {
 
 setupTabs();
 setupHitlSubtabs();
-loadProducts();
-loadPrd();
+setupChat();
+loadLots();
+initChat();

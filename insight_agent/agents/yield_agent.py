@@ -1,4 +1,4 @@
-"""시장 에이전트 -- 제품별 매출/시장점유율 추이를 조회한다."""
+"""수율 에이전트 -- 결함 메커니즘/공정 노드 기준으로 웨이퍼 로트 수율 패턴을 짚어낸다."""
 from __future__ import annotations
 
 from typing import Optional
@@ -9,17 +9,17 @@ from insight_agent.mymcp.client import McpClient
 
 
 def run(
-    product_id: str,
-    region: Optional[str] = None,
+    defect_mechanism: Optional[str] = None,
+    product_node: Optional[str] = None,
     trace: Optional[TraceLogger] = None,
 ) -> list[dict]:
     trace = trace or TraceLogger()
-    args = {"product_id": product_id, "region": region}
+    args = {"defect_mechanism": defect_mechanism, "product_node": product_node}
 
     def _call() -> list[dict]:
         with McpClient() as client:
-            return client.call_tool("get_market_impact", args)
+            return client.call_tool("get_yield_defects", args)
 
     result = run_with_retry(_call)
-    trace.log("market_agent.get_market_impact", args, result)
+    trace.log("yield_agent.get_yield_defects", args, result)
     return result

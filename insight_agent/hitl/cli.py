@@ -34,9 +34,9 @@ def main() -> None:
         for item in pending:
             report = item["report"]
             print(
-                f"[{item['approval_id']}] product={report['product_id']} "
-                f"critical_defects={report['critical_defect_count']} "
-                f"latest_market_share={report.get('latest_market_share_pct')}"
+                f"[{item['approval_id']}] lot={report['lot_id']} "
+                f"fdc_interlock_count={report['fdc_interlock_count']} "
+                f"die_yield_pct={report.get('die_yield_pct')}"
             )
     elif args.command == "approve":
         print(approvals.approve(args.approval_id))

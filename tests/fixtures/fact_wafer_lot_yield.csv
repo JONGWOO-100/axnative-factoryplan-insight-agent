@@ -1,0 +1,5 @@
+lot_id,production_date,year,quarter,company_name,business_unit,product_node,input_wafer_qty,prime_wafer_qty,scrap_wafer_qty,chip_gross_die_qty,wafer_yield_pct,die_yield_pct,major_defect_mechanism,ai_apc_applied,data_lake_sync_status
+LOT-F001,2024-01-01,2024,2024-Q1,TestCo,Test BU,Node-A,25,22,1,10000,88.0,86.0,None(Clean),1,Synced
+LOT-F002,2024-01-02,2024,2024-Q1,TestCo,Test BU,Node-A,25,20,2,10000,80.0,78.0,Gate Particle,1,Synced
+LOT-F003,2024-02-01,2024,2024-Q1,TestCo,Test BU,Node-B,25,23,1,10000,92.0,90.0,None(Clean),0,Synced
+LOT-F004,2024-02-02,2024,2024-Q1,TestCo,Test BU,Node-B,25,21,1,10000,84.0,82.0,Bridge Defect,1,Synced

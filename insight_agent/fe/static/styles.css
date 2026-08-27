@@ -80,7 +80,7 @@ button:hover { border-color: var(--accent); }
 
 .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
 
-main { padding: 20px; max-width: 1100px; margin: 0 auto; }
+main { padding: 20px; max-width: 1320px; margin: 0 auto; }
 
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
@@ -141,3 +141,121 @@ main { padding: 20px; max-width: 1100px; margin: 0 auto; }
 .badge-ok { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); }
 
 .hotl-header { display: flex; justify-content: space-between; align-items: center; }
+
+/* ---- 대화형 분석 탭 ---- */
+
+.chat-layout { display: flex; gap: 16px; align-items: stretch; }
+.chat-col {
+  flex: 1 1 55%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  height: 540px;
+}
+.pipeline-col {
+  flex: 1 1 45%;
+  min-width: 0;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  height: 540px;
+  overflow-y: auto;
+}
+.pipeline-col h3 { margin-top: 0; font-size: 15px; }
+
+.chat-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+#chat-save-report-btn { flex-shrink: 0; }
+
+.chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 4px 2px; }
+.chat-bubble {
+  max-width: 88%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+.chat-bubble-user { align-self: flex-end; background: var(--accent); color: white; border-bottom-right-radius: 2px; }
+.chat-bubble-assistant { align-self: flex-start; background: var(--bg); border: 1px solid var(--border); border-bottom-left-radius: 2px; }
+
+.report-ready-link {
+  align-self: center;
+  margin-top: 6px;
+  background: color-mix(in srgb, var(--ok) 15%, transparent);
+  border-color: var(--ok);
+  color: var(--ok);
+  font-weight: 600;
+}
+
+.chat-suggestions { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.suggestion-chip { border-radius: 999px; padding: 6px 12px; font-size: 12px; background: var(--bg); text-align: left; }
+.suggestion-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+.chat-input-row { display: flex; gap: 8px; }
+.chat-input-row input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+.chat-input-row button { background: var(--accent); color: white; border-color: var(--accent); }
+
+.pipeline-viz { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.pipeline-node {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-size: 13px;
+  transition: all .25s ease;
+}
+.pipeline-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+.pipeline-node.pending { opacity: .55; }
+.pipeline-node.active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--panel)); }
+.pipeline-node.active .pipeline-dot {
+  background: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 25%, transparent);
+  animation: pipeline-pulse 1s infinite;
+}
+.pipeline-node.done .pipeline-dot { background: var(--ok); }
+.pipeline-node.done { border-color: color-mix(in srgb, var(--ok) 40%, var(--border)); }
+
+@keyframes pipeline-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 40%, transparent); }
+  100% { box-shadow: 0 0 0 8px transparent; }
+}
+
+.graph-context h4 { margin: 0 0 8px; font-size: 13px; color: var(--muted); }
+.graph-context-body {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 12px;
+  max-height: 220px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+@media (max-width: 900px) {
+  .chat-layout { flex-direction: column; }
+  .chat-col, .pipeline-col { height: auto; }
+}

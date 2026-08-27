@@ -1,0 +1,6 @@
+fdc_log_id,lot_id,process_id,chamber_id,timestamp,rf_power_w,chamber_pressure_mtorr,susceptor_temp_c,process_gas_sccm,plasma_impedance_ohm,vm_pred_thickness_nm,actual_thickness_nm,fdc_interlock_flag,controlling_ai_agent
+FDC-F001,LOT-F001,PRC-F01,CHMB-F01,2024-01-01 10:00:00,2400,15.0,68,120,50,45.0,45.05,0,AGT-F02
+FDC-F002,LOT-F002,PRC-F01,CHMB-F01,2024-01-02 10:00:00,2400,15.0,68,120,50,45.0,47.0,1,AGT-F01
+FDC-F003,LOT-F002,PRC-F02,CHMB-F02,2024-01-02 11:00:00,2400,15.0,68,120,50,45.0,45.02,0,AGT-F02
+FDC-F004,LOT-F003,PRC-F02,CHMB-F02,2024-02-01 10:00:00,2400,15.0,68,120,50,45.0,45.03,0,AGT-F02
+FDC-F005,LOT-F003,PRC-F01,CHMB-F01,2024-02-01 11:00:00,2400,15.0,68,120,50,45.0,47.5,0,AGT-F01

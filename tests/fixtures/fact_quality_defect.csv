@@ -1,5 +1,0 @@
-defect_id,run_id,product_id,equipment_id,inspection_datetime,defect_type,defect_qty,severity,root_cause,action_taken,inspector_id
-DEF-F001,RUN-F002,PRD-F001,EQ-F01,2024-01-02 10:00:00,발열 임계치 초과 (Thermal Issue),20,Critical,부품 결함,PM 실시,INSP-F01
-DEF-F002,RUN-F002,PRD-F001,EQ-F01,2024-01-02 11:00:00,외관 크랙 (Crack),5,Minor,취급 부주의,재작업,INSP-F01
-DEF-F003,RUN-F003,PRD-F002,EQ-F02,2024-02-01 10:00:00,커넥터 오삽입 (Pin Defect),5,Major,작업자 실수,재작업,INSP-F02
-DEF-F004,RUN-F004,PRD-F003,EQ-F02,2024-02-02 10:00:00,표면 조도 불량 (Surface Roughness),10,Critical,금형 마모,금형 교체,INSP-F02

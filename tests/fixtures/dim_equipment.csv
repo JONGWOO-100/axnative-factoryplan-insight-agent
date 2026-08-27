@@ -1,3 +1,0 @@
-equipment_id,factory_code,factory_name,line_id,equipment_type,equipment_name,rated_power_kwh,install_date,maintenance_cycle_days,status
-EQ-F01,FAC-TEST-01,FAC-TEST-01 (테스트공장),LINE-01,SMT-SurfaceMount,테스트 라인 #1,5.0,2023-01-01,30,Operational
-EQ-F02,FAC-TEST-01,FAC-TEST-01 (테스트공장),LINE-02,CNC-PrecisionMill,테스트 라인 #2,6.0,2023-02-01,45,Operational
