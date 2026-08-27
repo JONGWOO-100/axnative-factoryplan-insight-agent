@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "electronics-insight": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["-m", "insight_agent.mymcp.server"],
+      "cwd": "${CLAUDE_PROJECT_DIR:-.}"
+    }
+  }
+}

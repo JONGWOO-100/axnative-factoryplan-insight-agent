@@ -4,7 +4,7 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-DATASET_DIR = Path(os.environ.get("DATASET_DIR", "/Users/chunghyo/Desktop/dataset_1"))
+DATASET_DIR = Path(os.environ.get("DATASET_DIR", str(Path.home() / "Desktop" / "dataset_1")))
 XLSX_PATH = DATASET_DIR / "electronics_manufacturing_market_data_3yr.xlsx"
 
 OUTPUTS_DIR = PROJECT_ROOT / "outputs"

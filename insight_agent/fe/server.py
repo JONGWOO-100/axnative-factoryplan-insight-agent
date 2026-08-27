@@ -72,8 +72,11 @@ def api_run(handler: "Handler", match: re.Match) -> Any:
     trace = TraceLogger()
     try:
         outcome = integration_agent.run(product_id, trace=trace)
-    except ValueError as exc:
-        raise ApiError(404, str(exc))
+    except (ValueError, RuntimeError) as exc:
+        message = str(exc)
+        if "unknown product_id" in message:
+            raise ApiError(404, message)
+        raise
     outcome["run_id"] = trace.run_id
     return outcome
 

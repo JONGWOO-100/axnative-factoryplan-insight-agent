@@ -11,7 +11,7 @@
 
 ## 데이터
 
-기본 경로는 `/Users/chunghyo/Desktop/dataset_1`이며, 환경변수로 바꿀 수 있습니다.
+기본 경로는 `~/Desktop/dataset_1`(실행 사용자의 홈 디렉토리 기준)이며, 환경변수로 바꿀 수 있습니다.
 
 ```bash
 export DATASET_DIR=/path/to/other/dataset
@@ -23,8 +23,7 @@ export DATASET_DIR=/path/to/other/dataset
 insight_agent/
   config.py          # 경로/임계치 설정
   domain.py          # 데이터 접근·조인 로직 (스키마 지식은 전부 여기에)
-  mymcp/             # 커스텀 MCP 서버/클라이언트 (SDK 없이 stdio + Content-Length 직접 구현)
-    framing.py
+  mymcp/             # FastMCP 기반 MCP 서버/클라이언트 (로컬 stdio 전송)
     server.py
     client.py
   agents/            # 도메인 기반 4분할: 생산/품질/시장/통합(인과)
@@ -82,15 +81,21 @@ python -m insight_agent.hitl.cli approve appr-xxxxxxxx
 python -m insight_agent.hitl.cli reject appr-xxxxxxxx --reason "원인 재확인 필요"
 ```
 
-### 3. MCP 서버 단독 실행 (Claude Code 등에 등록할 때)
+### 3. MCP 서버 단독 실행 / Claude Code 자동 등록
+
+저장소 루트의 [.mcp.json](.mcp.json)에 프로젝트 스코프로 이미 등록되어 있다.
+`${CLAUDE_PROJECT_DIR}`를 사용하므로 절대경로 수정 없이, 이 저장소를 클론해서
+Claude Code(CLI/Desktop)로 열기만 하면 자동으로 인식된다. 최초 1회 프로젝트
+MCP 서버 승인 프롬프트만 확인하면 이후 계속 활성화된 상태로 유지된다.
 
 ```json
 {
   "mcpServers": {
     "electronics-insight": {
-      "command": "python",
+      "type": "stdio",
+      "command": "python3",
       "args": ["-m", "insight_agent.mymcp.server"],
-      "cwd": "/path/to/electronics-insight-agent"
+      "cwd": "${CLAUDE_PROJECT_DIR:-.}"
     }
   }
 }
@@ -138,6 +143,5 @@ python -m insight_agent.fe.server
 
 ## 다음 단계 (이 MVP 이후)
 
-1. `mymcp/`를 공식 MCP SDK 기반으로 교체 (전송 계층만 바뀌고 `domain.py`는 그대로 재사용)
-2. `narrative.py`의 LLM 요약을 실제 운영 톤/포맷 가이드에 맞게 프롬프트 다듬기
-3. 리전별/공장별 접근 권한 분리 (지금은 모든 사용자가 전체 데이터를 조회 가능)
+1. `narrative.py`의 LLM 요약을 실제 운영 톤/포맷 가이드에 맞게 프롬프트 다듬기
+2. 리전별/공장별 접근 권한 분리 (지금은 모든 사용자가 전체 데이터를 조회 가능)
