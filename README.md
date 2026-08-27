@@ -126,6 +126,11 @@ python -m insight_agent.fe.server
   스냅샷입니다. 전분기 대비 `MARKET_SHARE_DROP_ALERT_PP`(기본 -2.0%p) 이하로
   하락한 리전x카테고리만 `alerts`에 표시되고, 사람은 필요할 때만 개입합니다.
 
+## 참고 문서
+
+- [docs/prd.md](docs/prd.md) — PRD
+- [docs/TOKEN_OPTIMIZATION.md](docs/TOKEN_OPTIMIZATION.md) — Claude Code 토큰 최적화 가이드
+
 ## 다음 단계 (이 MVP 이후)
 
 1. `write_causal_report`가 만드는 구조화 데이터를 실제 서술형 리포트로 바꿀
