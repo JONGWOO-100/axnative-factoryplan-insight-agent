@@ -138,7 +138,10 @@ python -m insight_agent.fe.server
 
 ## 참고 문서
 
-- [docs/prd.md](docs/prd.md) — PRD
+- `docs/prd.md`은 이 repo에 포함하지 않습니다 — Day 1(데이터 분석 -> PRD 작성)
+  실습으로 각자 직접 작성하는 문서이기 때문입니다. 위 "핵심 시나리오"와
+  "데이터" 절, `insight_agent/domain.py`의 스키마를 참고해 본인만의 분석
+  방향으로 작성해보세요.
 - [docs/TOKEN_OPTIMIZATION.md](docs/TOKEN_OPTIMIZATION.md) — Claude Code 토큰 최적화 가이드
 
 ## 다음 단계 (이 MVP 이후)
