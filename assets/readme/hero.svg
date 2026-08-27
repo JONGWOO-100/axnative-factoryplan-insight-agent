@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1200" height="420" viewBox="0 0 1200 420"
+     role="img" aria-labelledby="hero-title hero-desc">
+  <title id="hero-title">electronics-insight-agent</title>
+  <desc id="hero-desc">생산·품질 이상이 시장 성과에 영향을 줬는지 product_id 하나로 추적하고, Critical 결함이 임계치를 넘으면 사람 승인을 거쳐 리포트를 발행하는 멀티에이전트 실습 키트</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#6B7280"/>
+    </marker>
+    <marker id="arrowAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#D98C33"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="420" fill="#0B0D0F"/>
+
+  <!-- title block -->
+  <g id="title-block" transform="translate(56 60)">
+    <text x="0" y="0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" letter-spacing="1.5" fill="#8B93A1">MULTI-AGENT · CUSTOM MCP · HITL/HOTL 실습 키트</text>
+
+    <rect x="0" y="20" width="330" height="34" rx="8" fill="none" stroke="#2A2F35" stroke-width="1.5"/>
+    <text x="14" y="42" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17" fill="#F3F1EA">electronics-<tspan fill="#D98C33">insight</tspan>-agent</text>
+
+    <text x="0" y="112" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif" font-size="32" font-weight="600" fill="#F3F1EA">설비·품질 이상이</text>
+    <text x="0" y="154" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif" font-size="32" font-weight="600" fill="#F3F1EA">시장 성과를 흔들었는가</text>
+
+    <text x="0" y="196" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif" font-size="16.5" fill="#B7BEC9">product_id 하나로 추적하고, Critical 결함이</text>
+    <text x="0" y="221" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif" font-size="16.5" fill="#B7BEC9">임계치를 넘으면 사람 승인을 거쳐 발행합니다</text>
+
+    <g transform="translate(0 266)" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" fill="#8B93A1">
+      <rect x="0" y="-16" width="76" height="26" rx="13" fill="none" stroke="#2A2F35" stroke-width="1.5"/>
+      <text x="14" y="2">Python</text>
+      <rect x="88" y="-16" width="92" height="26" rx="13" fill="none" stroke="#2A2F35" stroke-width="1.5"/>
+      <text x="102" y="2">FastMCP</text>
+      <rect x="192" y="-16" width="72" height="26" rx="13" fill="none" stroke="#2A2F35" stroke-width="1.5"/>
+      <text x="206" y="2">pytest</text>
+    </g>
+
+    <text x="0" y="316" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#4B515A">runs/&lt;run_id&gt;.jsonl · approvals/pending/ · outputs/</text>
+  </g>
+
+  <!-- system map -->
+  <g id="project-proof" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+
+    <!-- source cards -->
+    <g id="sources" transform="translate(486 76)">
+      <g>
+        <rect x="0" y="0" width="170" height="60" rx="10" fill="#14171B" stroke="#2A2F35" stroke-width="1.5"/>
+        <circle cx="24" cy="30" r="4" fill="#8B93A1"/>
+        <text x="42" y="37" font-size="20" fill="#F3F1EA">생산·설비</text>
+      </g>
+      <g transform="translate(0 84)">
+        <rect x="0" y="0" width="170" height="60" rx="10" fill="#14171B" stroke="#2A2F35" stroke-width="1.5"/>
+        <circle cx="24" cy="30" r="4" fill="#8B93A1"/>
+        <text x="42" y="37" font-size="20" fill="#F3F1EA">품질</text>
+      </g>
+      <g transform="translate(0 168)">
+        <rect x="0" y="0" width="170" height="60" rx="10" fill="#14171B" stroke="#2A2F35" stroke-width="1.5"/>
+        <circle cx="24" cy="30" r="4" fill="#8B93A1"/>
+        <text x="42" y="37" font-size="20" fill="#F3F1EA">시장</text>
+      </g>
+    </g>
+
+    <!-- converging lines to integration -->
+    <path d="M656,106 C 700,106 700,190 686,190" fill="none" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <path d="M656,190 L686,190" fill="none" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <path d="M656,274 C 700,274 700,190 686,190" fill="none" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <!-- integration agent -->
+    <g id="integration" transform="translate(686 148)">
+      <rect x="0" y="0" width="180" height="84" rx="10" fill="#14171B" stroke="#D98C33" stroke-width="1.5"/>
+      <text x="18" y="35" font-size="19" fill="#F3F1EA">통합 에이전트</text>
+      <text x="18" y="58" font-size="12.5" font-family="ui-monospace, monospace" fill="#8B93A1">build_causal_report()</text>
+    </g>
+
+    <path d="M866,190 L906,190" fill="none" stroke="#D98C33" stroke-width="1.5" marker-end="url(#arrowAmber)"/>
+
+    <!-- gate -->
+    <g id="gate" transform="translate(946 190)">
+      <path d="M0,-40 L40,0 L0,40 L-40,0 Z" fill="#0B0D0F" stroke="#D98C33" stroke-width="2"/>
+      <circle cx="0" cy="0" r="5" fill="#D98C33"/>
+    </g>
+    <text x="946" y="252" font-size="16" font-family="ui-monospace, monospace" fill="#D98C33" text-anchor="middle">Critical &#8805; 3</text>
+
+    <path d="M986,178 C 1000,150 1000,120 1012,110" fill="none" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <path d="M986,202 C 1000,230 1000,260 1012,270" fill="none" stroke="#D98C33" stroke-width="1.5" marker-end="url(#arrowAmber)"/>
+
+    <!-- outcomes -->
+    <g transform="translate(1012 82)">
+      <rect x="0" y="0" width="132" height="56" rx="10" fill="#14171B" stroke="#2A2F35" stroke-width="1.5"/>
+      <text x="66" y="35" font-size="18" fill="#F3F1EA" text-anchor="middle">자동 발행</text>
+    </g>
+    <g transform="translate(1012 242)">
+      <rect x="0" y="0" width="132" height="56" rx="10" fill="#1F1811" stroke="#D98C33" stroke-width="1.5"/>
+      <text x="66" y="35" font-size="18" fill="#F3F1EA" text-anchor="middle">승인 대기</text>
+    </g>
+  </g>
+</svg>

@@ -1,4 +1,6 @@
-# electronics-insight-agent
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="electronics-insight-agent — product_id 하나로 설비·품질 이상이 시장 성과에 영향을 줬는지 추적하고, Critical 결함이 임계치를 넘으면 사람 승인을 거쳐 리포트를 발행하는 멀티에이전트 실습 키트">
+</p>
 
 `dataset_1`(생산·설비·품질·시장 통합 3개년 스타 스키마 데이터)을 기반으로 만든
 멀티에이전트 + 커스텀 MCP + 하네스 엔지니어링 + HITL/HOTL 실습 패키지의 MVP입니다.
@@ -8,6 +10,39 @@
 "이 제품의 설비/품질 이상이 시장 성과에 영향을 줬는가?"를 `product_id` 하나로
 추적해, Critical 등급 결함이 임계치 이상 누적된 경우에만 사람 승인을 거쳐
 리포트를 발행합니다.
+
+## 빠른 시작
+
+```bash
+cd /path/to/electronics-insight-agent
+pip install -r requirements.txt
+
+# 자동 발행 경로 (Critical 결함 2건 -> 임계치 미만)
+python -m insight_agent.scripts.run_pipeline --product-id PRD-1076
+
+# HITL 승인 대기 경로 (Critical 결함 4건 -> 임계치 이상, 승인 큐로 이동)
+python -m insight_agent.scripts.run_pipeline --product-id PRD-1013
+```
+
+내부적으로 (1) CSV/xlsx 소스 정합성 검사 -> (2) 통합 에이전트가 MCP 서버에
+`build_causal_report` 호출 -> (3) 가드레일 검증 -> (4) HITL 게이트 판단
+(Critical 결함 3건 이상이면 승인 대기, 아니면 자동 발행) -> (5) HOTL 스냅샷 생성
+순서로 동작하며, `runs/<run_id>.jsonl`에 전체 트레이스가 남습니다. 두 product_id로
+자동 발행/승인 대기 두 경로를 각각 실습할 수 있습니다.
+
+## HITL vs HOTL
+
+<p align="center">
+  <img src="./assets/readme/hitl-hotl.svg" width="100%" alt="HITL은 Critical 결함이 임계치를 넘으면 발행을 멈추고 사람 승인을 기다리고, HOTL은 항상 시장점유율을 계산하며 급락 구간만 표시합니다">
+</p>
+
+- **HITL** (`insight_agent/hitl/`): 통합 에이전트가 만든 리포트에서 Critical 결함이
+  `CRITICAL_DEFECT_HITL_THRESHOLD`(기본 3건) 이상이면 자동 발행을 멈추고
+  `approvals/pending/`에 대기시킵니다. 사람이 승인해야 `outputs/`에 최종 리포트가
+  생성됩니다.
+- **HOTL** (`insight_agent/hotl/`): 승인 대기 없이 항상 계산·노출되는 시장점유율
+  스냅샷입니다. 전분기 대비 `MARKET_SHARE_DROP_ALERT_PP`(기본 -2.0%p) 이하로
+  하락한 리전x카테고리만 `alerts`에 표시되고, 사람은 필요할 때만 개입합니다.
 
 ## 데이터
 
@@ -48,32 +83,9 @@ insight_agent/
     run_pipeline.py    # 엔드투엔드 데모 진입점
 ```
 
-## 설치
+## 더 알아보기
 
-```bash
-cd /path/to/electronics-insight-agent
-pip install -r requirements.txt
-```
-
-## 실행
-
-### 1. 엔드투엔드 데모
-
-```bash
-# 자동 발행 경로 (Critical 결함 2건 -> 임계치 미만)
-python -m insight_agent.scripts.run_pipeline --product-id PRD-1076
-
-# HITL 승인 대기 경로 (Critical 결함 4건 -> 임계치 이상, 승인 큐로 이동)
-python -m insight_agent.scripts.run_pipeline --product-id PRD-1013
-```
-
-내부적으로 (1) CSV/xlsx 소스 정합성 검사 -> (2) 통합 에이전트가 MCP 서버에
-`build_causal_report` 호출 -> (3) 가드레일 검증 -> (4) HITL 게이트 판단
-(Critical 결함 3건 이상이면 승인 대기, 아니면 자동 발행) -> (5) HOTL 스냅샷 생성
-순서로 동작하며, `runs/<run_id>.jsonl`에 전체 트레이스가 남습니다. 두 product_id로
-자동 발행/승인 대기 두 경로를 각각 실습할 수 있습니다.
-
-### 2. HITL 승인 큐 확인/처리
+### HITL 승인 큐 확인/처리
 
 ```bash
 python -m insight_agent.hitl.cli list
@@ -81,7 +93,7 @@ python -m insight_agent.hitl.cli approve appr-xxxxxxxx
 python -m insight_agent.hitl.cli reject appr-xxxxxxxx --reason "원인 재확인 필요"
 ```
 
-### 3. MCP 서버 단독 실행 / Claude Code 자동 등록
+### MCP 서버 단독 실행 / Claude Code 자동 등록
 
 저장소 루트의 [.mcp.json](.mcp.json)에 프로젝트 스코프로 이미 등록되어 있다.
 `${CLAUDE_PROJECT_DIR}`를 사용하므로 절대경로 수정 없이, 이 저장소를 클론해서
@@ -101,20 +113,20 @@ MCP 서버 승인 프롬프트만 확인하면 이후 계속 활성화된 상태
 }
 ```
 
-### 4. 골든셋 이밸류에이션
+### 골든셋 이밸류에이션
 
 ```bash
 python -m insight_agent.evals.build_golden_set   # 최초 1회, golden_defects.jsonl 생성
 python -m insight_agent.evals.run_eval           # 통과율 출력, 미달 시 non-zero exit
 ```
 
-### 5. 테스트
+### 테스트
 
 ```bash
 pytest -v
 ```
 
-### 6. 웹 FE
+### 웹 FE
 
 ```bash
 python -m insight_agent.fe.server
@@ -125,16 +137,6 @@ python -m insight_agent.fe.server
 4개 탭(PRD / 트레이스 / HITL 승인 큐 / HOTL 모니터)에서 상단의 제품 선택 후
 "분석 실행"을 누르면 통합 에이전트가 실제로 실행되고, 그 결과가 트레이스/승인 큐/HOTL
 탭에 그대로 반영됩니다.
-
-## HITL vs HOTL
-
-- **HITL** (`insight_agent/hitl/`): 통합 에이전트가 만든 리포트에서 Critical 결함이
-  `CRITICAL_DEFECT_HITL_THRESHOLD`(기본 3건) 이상이면 자동 발행을 멈추고
-  `approvals/pending/`에 대기시킵니다. 사람이 승인해야 `outputs/`에 최종 리포트가
-  생성됩니다.
-- **HOTL** (`insight_agent/hotl/`): 승인 대기 없이 항상 계산·노출되는 시장점유율
-  스냅샷입니다. 전분기 대비 `MARKET_SHARE_DROP_ALERT_PP`(기본 -2.0%p) 이하로
-  하락한 리전x카테고리만 `alerts`에 표시되고, 사람은 필요할 때만 개입합니다.
 
 ## 참고 문서
 
