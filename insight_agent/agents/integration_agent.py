@@ -10,6 +10,7 @@ from typing import Optional
 
 from insight_agent.config import CRITICAL_DEFECT_HITL_THRESHOLD
 from insight_agent.harness.guardrails import validate_report
+from insight_agent.harness.loop import run_with_retry
 from insight_agent.harness.trace import TraceLogger
 from insight_agent.hitl import approvals
 from insight_agent.mymcp.client import McpClient
@@ -19,8 +20,11 @@ from insight_agent.agents import narrative
 def run(product_id: str, trace: Optional[TraceLogger] = None) -> dict:
     trace = trace or TraceLogger()
 
-    with McpClient() as client:
-        report = client.call_tool("build_causal_report", {"product_id": product_id})
+    def _call() -> dict:
+        with McpClient() as client:
+            return client.call_tool("build_causal_report", {"product_id": product_id})
+
+    report = run_with_retry(_call)
     trace.log("integration_agent.build_causal_report", {"product_id": product_id}, report)
 
     validate_report(report)

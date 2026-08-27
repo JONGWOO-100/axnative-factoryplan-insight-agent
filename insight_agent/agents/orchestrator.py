@@ -6,9 +6,10 @@ HITL도 없었다. 여기서는 라우팅 축을 카테고리가 아니라 '도�
 """
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Optional
 
 from insight_agent.agents import integration_agent, market_agent, production_agent, quality_agent
+from insight_agent.harness.trace import TraceLogger
 
 ROUTING_TABLE = {
     "production": ["설비", "생산", "oee", "가동률", "라인"],
@@ -27,12 +28,20 @@ def classify(query: str) -> str:
     return best if scores[best] > 0 else "integration"
 
 
-def route(query: str, **kwargs: Any) -> dict:
+def route(query: str, trace: Optional[TraceLogger] = None, **kwargs: Any) -> dict:
+    # 어떤 도메인으로 라우팅되든 같은 TraceLogger를 공유해, 라우팅 결정부터
+    # 실제 에이전트 호출까지 하나의 run_id로 추적되게 한다.
+    trace = trace or TraceLogger()
     domain = classify(query)
+    trace.log("orchestrator.classify", {"query": query}, {"domain": domain})
+
+    kwargs["trace"] = trace
     if domain == "production":
-        return {"domain": domain, "result": production_agent.run(**kwargs)}
-    if domain == "quality":
-        return {"domain": domain, "result": quality_agent.run(**kwargs)}
-    if domain == "market":
-        return {"domain": domain, "result": market_agent.run(**kwargs)}
-    return {"domain": "integration", "result": integration_agent.run(**kwargs)}
+        result = production_agent.run(**kwargs)
+    elif domain == "quality":
+        result = quality_agent.run(**kwargs)
+    elif domain == "market":
+        result = market_agent.run(**kwargs)
+    else:
+        result = integration_agent.run(**kwargs)
+    return {"domain": domain, "result": result, "run_id": trace.run_id}
