@@ -49,7 +49,10 @@ class McpClient:
         try:
             result = self._loop.run_until_complete(self._client.call_tool(name, arguments or {}))
         except ToolError as exc:
-            raise RuntimeError(str(exc)) from exc
+            # 툴 함수(domain.py) 안에서 난 에러 -- 같은 인자로 다시 불러도 결과가
+            # 같은 결정론적 도메인 에러이므로 ValueError로 올려 harness.loop의
+            # run_with_retry(retry_on=(RuntimeError, OSError))가 재시도하지 않게 한다.
+            raise ValueError(str(exc)) from exc
         return result.data
 
     def close(self) -> None:

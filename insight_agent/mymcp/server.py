@@ -63,7 +63,9 @@ def build_causal_report(product_id: str) -> dict:
 
 
 def serve() -> None:
-    mcp.run()
+    # 배너는 stderr로 나가 stdio 프로토콜(stdout)을 깨지는 않지만, CLI 데모/이밸류
+    # 출력과 섞여 매 서브프로세스 기동마다 노이즈를 만들어 꺼둔다.
+    mcp.run(show_banner=False)
 
 
 if __name__ == "__main__":
