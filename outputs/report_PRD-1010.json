@@ -1,0 +1,788 @@
+{
+  "product_id": "PRD-1010",
+  "model_name": "NX-Zenith Infinity Tab",
+  "category": "태블릿 (Tablet)",
+  "company_name": "NexaCore Technologies",
+  "production_run_count": 17,
+  "anomaly_run_count": 11,
+  "defect_count": 17,
+  "critical_defect_count": 4,
+  "critical_defect_types": {
+    "외관 단차 (Gap Mismatch)": 1,
+    "전원 인가 불량 (Power Failure)": 1,
+    "외관 크랙 (Crack)": 1,
+    "부품 틀어짐 (Misalignment)": 1
+  },
+  "market_share_trend": [
+    {
+      "sales_month": "2024-01",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 9.7,
+      "revenue_krw": 196891200
+    },
+    {
+      "sales_month": "2024-01",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 11.9,
+      "revenue_krw": 576734400
+    },
+    {
+      "sales_month": "2024-01",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 25.1,
+      "revenue_krw": 272250000
+    },
+    {
+      "sales_month": "2024-01",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 6.1,
+      "revenue_krw": 545490000
+    },
+    {
+      "sales_month": "2024-02",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 23.0,
+      "revenue_krw": 537570000
+    },
+    {
+      "sales_month": "2024-02",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 26.1,
+      "revenue_krw": 495712800
+    },
+    {
+      "sales_month": "2024-02",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 20.0,
+      "revenue_krw": 446054400
+    },
+    {
+      "sales_month": "2024-02",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 25.6,
+      "revenue_krw": 117810000
+    },
+    {
+      "sales_month": "2024-03",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 15.3,
+      "revenue_krw": 765270000
+    },
+    {
+      "sales_month": "2024-03",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 11.6,
+      "revenue_krw": 712899000
+    },
+    {
+      "sales_month": "2024-03",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 6.9,
+      "revenue_krw": 204088500
+    },
+    {
+      "sales_month": "2024-03",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 19.3,
+      "revenue_krw": 156123000
+    },
+    {
+      "sales_month": "2024-04",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 5.4,
+      "revenue_krw": 807889500
+    },
+    {
+      "sales_month": "2024-04",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 6.9,
+      "revenue_krw": 176695200
+    },
+    {
+      "sales_month": "2024-04",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 26.2,
+      "revenue_krw": 158400000
+    },
+    {
+      "sales_month": "2024-04",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 27.1,
+      "revenue_krw": 489614400
+    },
+    {
+      "sales_month": "2024-05",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 9.2,
+      "revenue_krw": 691297200
+    },
+    {
+      "sales_month": "2024-05",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 16.3,
+      "revenue_krw": 813780000
+    },
+    {
+      "sales_month": "2024-05",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 28.5,
+      "revenue_krw": 414810000
+    },
+    {
+      "sales_month": "2024-05",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 24.6,
+      "revenue_krw": 835609500
+    },
+    {
+      "sales_month": "2024-06",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 5.3,
+      "revenue_krw": 626392800
+    },
+    {
+      "sales_month": "2024-06",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 19.0,
+      "revenue_krw": 264280500
+    },
+    {
+      "sales_month": "2024-06",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 4.5,
+      "revenue_krw": 1154340000
+    },
+    {
+      "sales_month": "2024-06",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 18.3,
+      "revenue_krw": 780120000
+    },
+    {
+      "sales_month": "2024-07",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 5.1,
+      "revenue_krw": 355410000
+    },
+    {
+      "sales_month": "2024-07",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 4.9,
+      "revenue_krw": 617522400
+    },
+    {
+      "sales_month": "2024-07",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 9.5,
+      "revenue_krw": 151420500
+    },
+    {
+      "sales_month": "2024-07",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 10.1,
+      "revenue_krw": 257697000
+    },
+    {
+      "sales_month": "2024-08",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 17.0,
+      "revenue_krw": 212553000
+    },
+    {
+      "sales_month": "2024-08",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 24.0,
+      "revenue_krw": 795960000
+    },
+    {
+      "sales_month": "2024-08",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 8.4,
+      "revenue_krw": 329709600
+    },
+    {
+      "sales_month": "2024-08",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 24.0,
+      "revenue_krw": 432630000
+    },
+    {
+      "sales_month": "2024-09",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 11.0,
+      "revenue_krw": 407880000
+    },
+    {
+      "sales_month": "2024-09",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 10.1,
+      "revenue_krw": 446737500
+    },
+    {
+      "sales_month": "2024-09",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 11.0,
+      "revenue_krw": 697672800
+    },
+    {
+      "sales_month": "2024-09",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 23.9,
+      "revenue_krw": 493653600
+    },
+    {
+      "sales_month": "2024-10",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 22.3,
+      "revenue_krw": 656686800
+    },
+    {
+      "sales_month": "2024-10",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 6.4,
+      "revenue_krw": 694089000
+    },
+    {
+      "sales_month": "2024-10",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 28.0,
+      "revenue_krw": 1138005000
+    },
+    {
+      "sales_month": "2024-10",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 20.7,
+      "revenue_krw": 871843500
+    },
+    {
+      "sales_month": "2024-11",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 19.0,
+      "revenue_krw": 624393000
+    },
+    {
+      "sales_month": "2024-11",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 10.3,
+      "revenue_krw": 624650400
+    },
+    {
+      "sales_month": "2024-11",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 26.5,
+      "revenue_krw": 606870000
+    },
+    {
+      "sales_month": "2024-11",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 23.2,
+      "revenue_krw": 707701500
+    },
+    {
+      "sales_month": "2024-12",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 18.4,
+      "revenue_krw": 1141470000
+    },
+    {
+      "sales_month": "2024-12",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 26.8,
+      "revenue_krw": 339520500
+    },
+    {
+      "sales_month": "2024-12",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 16.1,
+      "revenue_krw": 627660000
+    },
+    {
+      "sales_month": "2024-12",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 18.6,
+      "revenue_krw": 634837500
+    },
+    {
+      "sales_month": "2025-01",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 8.5,
+      "revenue_krw": 729630000
+    },
+    {
+      "sales_month": "2025-01",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 25.1,
+      "revenue_krw": 443559600
+    },
+    {
+      "sales_month": "2025-01",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 5.8,
+      "revenue_krw": 637560000
+    },
+    {
+      "sales_month": "2025-01",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 23.7,
+      "revenue_krw": 275220000
+    },
+    {
+      "sales_month": "2025-02",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 7.1,
+      "revenue_krw": 246510000
+    },
+    {
+      "sales_month": "2025-02",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 20.6,
+      "revenue_krw": 373428000
+    },
+    {
+      "sales_month": "2025-02",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 27.8,
+      "revenue_krw": 294465600
+    },
+    {
+      "sales_month": "2025-02",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 23.7,
+      "revenue_krw": 604890000
+    },
+    {
+      "sales_month": "2025-03",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 5.6,
+      "revenue_krw": 432986400
+    },
+    {
+      "sales_month": "2025-03",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 26.8,
+      "revenue_krw": 460864800
+    },
+    {
+      "sales_month": "2025-03",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 27.1,
+      "revenue_krw": 488119500
+    },
+    {
+      "sales_month": "2025-03",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 19.0,
+      "revenue_krw": 534600000
+    },
+    {
+      "sales_month": "2025-04",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 11.1,
+      "revenue_krw": 684684000
+    },
+    {
+      "sales_month": "2025-04",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 7.1,
+      "revenue_krw": 583704000
+    },
+    {
+      "sales_month": "2025-04",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 7.0,
+      "revenue_krw": 723967200
+    },
+    {
+      "sales_month": "2025-04",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 23.1,
+      "revenue_krw": 200970000
+    },
+    {
+      "sales_month": "2025-05",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 16.7,
+      "revenue_krw": 132422400
+    },
+    {
+      "sales_month": "2025-05",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 13.7,
+      "revenue_krw": 273240000
+    },
+    {
+      "sales_month": "2025-05",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 11.2,
+      "revenue_krw": 496584000
+    },
+    {
+      "sales_month": "2025-05",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 9.5,
+      "revenue_krw": 276883200
+    },
+    {
+      "sales_month": "2025-06",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 23.1,
+      "revenue_krw": 852390000
+    },
+    {
+      "sales_month": "2025-06",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 18.6,
+      "revenue_krw": 537530400
+    },
+    {
+      "sales_month": "2025-06",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 9.0,
+      "revenue_krw": 756162000
+    },
+    {
+      "sales_month": "2025-06",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 6.5,
+      "revenue_krw": 399880800
+    },
+    {
+      "sales_month": "2025-07",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 11.4,
+      "revenue_krw": 306939600
+    },
+    {
+      "sales_month": "2025-07",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 15.3,
+      "revenue_krw": 411840000
+    },
+    {
+      "sales_month": "2025-07",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 15.1,
+      "revenue_krw": 527670000
+    },
+    {
+      "sales_month": "2025-07",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 21.0,
+      "revenue_krw": 111513600
+    },
+    {
+      "sales_month": "2025-08",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 24.0,
+      "revenue_krw": 536580000
+    },
+    {
+      "sales_month": "2025-08",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 20.7,
+      "revenue_krw": 615780000
+    },
+    {
+      "sales_month": "2025-08",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 22.8,
+      "revenue_krw": 337906800
+    },
+    {
+      "sales_month": "2025-08",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 26.5,
+      "revenue_krw": 337590000
+    },
+    {
+      "sales_month": "2025-09",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 11.8,
+      "revenue_krw": 588376800
+    },
+    {
+      "sales_month": "2025-09",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 15.6,
+      "revenue_krw": 231363000
+    },
+    {
+      "sales_month": "2025-09",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 18.0,
+      "revenue_krw": 802890000
+    },
+    {
+      "sales_month": "2025-09",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 6.3,
+      "revenue_krw": 507870000
+    },
+    {
+      "sales_month": "2025-10",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 23.6,
+      "revenue_krw": 997326000
+    },
+    {
+      "sales_month": "2025-10",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 12.2,
+      "revenue_krw": 963072000
+    },
+    {
+      "sales_month": "2025-10",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 6.1,
+      "revenue_krw": 429165000
+    },
+    {
+      "sales_month": "2025-10",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 23.5,
+      "revenue_krw": 512780400
+    },
+    {
+      "sales_month": "2025-11",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 17.5,
+      "revenue_krw": 1137510000
+    },
+    {
+      "sales_month": "2025-11",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 5.8,
+      "revenue_krw": 772358400
+    },
+    {
+      "sales_month": "2025-11",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 9.0,
+      "revenue_krw": 191070000
+    },
+    {
+      "sales_month": "2025-11",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 15.8,
+      "revenue_krw": 1091920500
+    },
+    {
+      "sales_month": "2025-12",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 17.2,
+      "revenue_krw": 231660000
+    },
+    {
+      "sales_month": "2025-12",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 19.3,
+      "revenue_krw": 495000000
+    },
+    {
+      "sales_month": "2025-12",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 7.3,
+      "revenue_krw": 848331000
+    },
+    {
+      "sales_month": "2025-12",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 26.4,
+      "revenue_krw": 702553500
+    },
+    {
+      "sales_month": "2026-01",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 18.6,
+      "revenue_krw": 367052400
+    },
+    {
+      "sales_month": "2026-01",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 24.6,
+      "revenue_krw": 362092500
+    },
+    {
+      "sales_month": "2026-01",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 13.8,
+      "revenue_krw": 747766800
+    },
+    {
+      "sales_month": "2026-01",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 9.7,
+      "revenue_krw": 228690000
+    },
+    {
+      "sales_month": "2026-02",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 13.2,
+      "revenue_krw": 546480000
+    },
+    {
+      "sales_month": "2026-02",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 9.5,
+      "revenue_krw": 162706500
+    },
+    {
+      "sales_month": "2026-02",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 5.8,
+      "revenue_krw": 413503200
+    },
+    {
+      "sales_month": "2026-02",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 15.8,
+      "revenue_krw": 272745000
+    },
+    {
+      "sales_month": "2026-03",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 23.6,
+      "revenue_krw": 785109600
+    },
+    {
+      "sales_month": "2026-03",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 11.0,
+      "revenue_krw": 651766500
+    },
+    {
+      "sales_month": "2026-03",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 19.6,
+      "revenue_krw": 849420000
+    },
+    {
+      "sales_month": "2026-03",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 21.5,
+      "revenue_krw": 778140000
+    },
+    {
+      "sales_month": "2026-04",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 18.3,
+      "revenue_krw": 116820000
+    },
+    {
+      "sales_month": "2026-04",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 18.6,
+      "revenue_krw": 153925200
+    },
+    {
+      "sales_month": "2026-04",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 9.4,
+      "revenue_krw": 399712500
+    },
+    {
+      "sales_month": "2026-04",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 8.1,
+      "revenue_krw": 237946500
+    },
+    {
+      "sales_month": "2026-05",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 11.4,
+      "revenue_krw": 253935000
+    },
+    {
+      "sales_month": "2026-05",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 12.7,
+      "revenue_krw": 539847000
+    },
+    {
+      "sales_month": "2026-05",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 17.7,
+      "revenue_krw": 657409500
+    },
+    {
+      "sales_month": "2026-05",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 19.6,
+      "revenue_krw": 790574400
+    },
+    {
+      "sales_month": "2026-06",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 23.5,
+      "revenue_krw": 662112000
+    },
+    {
+      "sales_month": "2026-06",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 17.6,
+      "revenue_krw": 688564800
+    },
+    {
+      "sales_month": "2026-06",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 11.0,
+      "revenue_krw": 923670000
+    },
+    {
+      "sales_month": "2026-06",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 9.9,
+      "revenue_krw": 329313600
+    },
+    {
+      "sales_month": "2026-07",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 12.9,
+      "revenue_krw": 864270000
+    },
+    {
+      "sales_month": "2026-07",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 23.8,
+      "revenue_krw": 687060000
+    },
+    {
+      "sales_month": "2026-07",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 23.8,
+      "revenue_krw": 122265000
+    },
+    {
+      "sales_month": "2026-07",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 6.6,
+      "revenue_krw": 664785000
+    },
+    {
+      "sales_month": "2026-08",
+      "region": "유럽 (Europe)",
+      "market_share_est_pct": 15.6,
+      "revenue_krw": 102801600
+    },
+    {
+      "sales_month": "2026-08",
+      "region": "한국 (Korea)",
+      "market_share_est_pct": 5.8,
+      "revenue_krw": 418176000
+    },
+    {
+      "sales_month": "2026-08",
+      "region": "북미 (North America)",
+      "market_share_est_pct": 26.3,
+      "revenue_krw": 246826800
+    },
+    {
+      "sales_month": "2026-08",
+      "region": "동남아 (Southeast Asia)",
+      "market_share_est_pct": 19.1,
+      "revenue_krw": 396000000
+    }
+  ],
+  "latest_market_share_pct": 19.1,
+  "narrative_summary": "NX-Zenith Infinity Tab (PRD-1010, 태블릿 (Tablet))에서 생산 이상 11건, Critical 품질 결함 4건이 발견되었습니다. 가장 빈번한 Critical 결함 유형은 '외관 단차 (Gap Mismatch)'(1건)입니다. 가장 최근 시장점유율은 19.1%입니다."
+}

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>제조-시장 인과 인사이트 에이전트</title>
+<link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-title">제조-시장 인과 인사이트 에이전트</div>
+    <div class="topbar-controls">
+      <select id="product-select"><option value="">제품 선택...</option></select>
+      <button id="run-btn">분석 실행</button>
+      <span id="run-status" class="status-text"></span>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="prd">PRD</button>
+    <button class="tab-btn" data-tab="trace">트레이스</button>
+    <button class="tab-btn" data-tab="hitl">승인 큐 (HITL)</button>
+    <button class="tab-btn" data-tab="hotl">HOTL 모니터</button>
+  </nav>
+
+  <main>
+    <section id="tab-prd" class="tab-panel active">
+      <div id="prd-content" class="markdown-body">불러오는 중...</div>
+    </section>
+
+    <section id="tab-trace" class="tab-panel">
+      <div class="split">
+        <div class="split-left">
+          <h3>실행 이력</h3>
+          <div id="run-list" class="list"></div>
+        </div>
+        <div class="split-right">
+          <h3>트레이스 상세</h3>
+          <div id="run-detail" class="timeline">왼쪽에서 실행 이력을 선택하세요.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-hitl" class="tab-panel">
+      <div class="subtabs">
+        <button class="subtab-btn active" data-status="pending">대기중</button>
+        <button class="subtab-btn" data-status="approved">승인됨</button>
+        <button class="subtab-btn" data-status="rejected">반려됨</button>
+      </div>
+      <table class="data-table" id="approval-table">
+        <thead>
+          <tr>
+            <th>승인 ID</th><th>제품</th><th>카테고리</th><th>Critical 결함</th>
+            <th>최근 점유율</th><th>요약</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="approval-body"></tbody>
+      </table>
+    </section>
+
+    <section id="tab-hotl" class="tab-panel">
+      <div class="hotl-header">
+        <h3>리전 x 카테고리 시장점유율 모니터</h3>
+        <button id="hotl-refresh-btn">새로고침</button>
+      </div>
+      <div id="hotl-message" class="status-text"></div>
+      <h4>알림 (전분기 대비 급락)</h4>
+      <table class="data-table" id="hotl-alert-table">
+        <thead><tr><th>리전</th><th>카테고리</th><th>분기</th><th>변화폭(%p)</th></tr></thead>
+        <tbody id="hotl-alert-body"></tbody>
+      </table>
+      <h4>전체 추이</h4>
+      <table class="data-table" id="hotl-trend-table">
+        <thead><tr><th>리전</th><th>카테고리</th><th>분기</th><th>평균 점유율(%)</th></tr></thead>
+        <tbody id="hotl-trend-body"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
