@@ -1,0 +1,5 @@
+sensor_log_id,run_id,equipment_id,timestamp,temp_celsius,vibration_mms,pressure_bar,torque_nm,peak_current_amp,anomaly_flag
+SNS-F001,RUN-F001,EQ-F01,2024-01-01 09:00:00,60.0,0.5,5.0,20.0,10.0,0
+SNS-F002,RUN-F002,EQ-F01,2024-01-02 09:00:00,90.0,2.0,7.0,30.0,20.0,1
+SNS-F003,RUN-F003,EQ-F02,2024-02-01 09:00:00,70.0,0.8,6.0,25.0,12.0,1
+SNS-F004,RUN-F004,EQ-F02,2024-02-02 09:00:00,55.0,0.4,5.5,18.0,9.0,0

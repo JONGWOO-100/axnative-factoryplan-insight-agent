@@ -52,7 +52,7 @@ insight_agent/
 ## 설치
 
 ```bash
-cd /Users/chunghyo/electronics-insight-agent
+cd /path/to/electronics-insight-agent
 pip install -r requirements.txt
 ```
 
@@ -61,13 +61,18 @@ pip install -r requirements.txt
 ### 1. 엔드투엔드 데모
 
 ```bash
+# 자동 발행 경로 (Critical 결함 2건 -> 임계치 미만)
 python -m insight_agent.scripts.run_pipeline --product-id PRD-1076
+
+# HITL 승인 대기 경로 (Critical 결함 4건 -> 임계치 이상, 승인 큐로 이동)
+python -m insight_agent.scripts.run_pipeline --product-id PRD-1013
 ```
 
 내부적으로 (1) CSV/xlsx 소스 정합성 검사 -> (2) 통합 에이전트가 MCP 서버에
 `build_causal_report` 호출 -> (3) 가드레일 검증 -> (4) HITL 게이트 판단
 (Critical 결함 3건 이상이면 승인 대기, 아니면 자동 발행) -> (5) HOTL 스냅샷 생성
-순서로 동작하며, `runs/<run_id>.jsonl`에 전체 트레이스가 남습니다.
+순서로 동작하며, `runs/<run_id>.jsonl`에 전체 트레이스가 남습니다. 두 product_id로
+자동 발행/승인 대기 두 경로를 각각 실습할 수 있습니다.
 
 ### 2. HITL 승인 큐 확인/처리
 
@@ -85,7 +90,7 @@ python -m insight_agent.hitl.cli reject appr-xxxxxxxx --reason "원인 재확인
     "electronics-insight": {
       "command": "python",
       "args": ["-m", "insight_agent.mymcp.server"],
-      "cwd": "/Users/chunghyo/electronics-insight-agent"
+      "cwd": "/path/to/electronics-insight-agent"
     }
   }
 }
@@ -133,8 +138,6 @@ python -m insight_agent.fe.server
 
 ## 다음 단계 (이 MVP 이후)
 
-1. `write_causal_report`가 만드는 구조화 데이터를 실제 서술형 리포트로 바꿀
-   LLM 호출 지점 추가 (Claude API, `agents/integration_agent.py`)
-2. 웹 FE: PRD 뷰 / 트레이스 뷰 / 승인 큐 / HOTL 실시간 모니터 4탭
-   (`outputs/`, `runs/`, `approvals/`, `outputs/hotl_snapshot.json`을 그대로 읽어 렌더링 가능)
-3. `mymcp/`를 공식 MCP SDK 기반으로 교체 (전송 계층만 바뀌고 `domain.py`는 그대로 재사용)
+1. `mymcp/`를 공식 MCP SDK 기반으로 교체 (전송 계층만 바뀌고 `domain.py`는 그대로 재사용)
+2. `narrative.py`의 LLM 요약을 실제 운영 톤/포맷 가이드에 맞게 프롬프트 다듬기
+3. 리전별/공장별 접근 권한 분리 (지금은 모든 사용자가 전체 데이터를 조회 가능)

@@ -12,7 +12,7 @@ Claude Code에 등록하려면 .mcp.json에 다음과 같이 추가한다:
         "electronics-insight": {
           "command": "python",
           "args": ["-m", "insight_agent.mymcp.server"],
-          "cwd": "/Users/chunghyo/electronics-insight-agent"
+          "cwd": "/path/to/electronics-insight-agent"
         }
       }
     }
