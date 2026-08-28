@@ -35,8 +35,18 @@
           <h3>멀티에이전트 오케스트레이션 파이프라인</h3>
           <div id="pipeline-viz" class="pipeline-viz"></div>
           <div class="graph-context">
-            <h4>GraphRAG 컨텍스트</h4>
-            <pre id="graph-context-body" class="graph-context-body status-text">대화를 시작하면 관련 지식 그래프 사실이 표시됩니다.</pre>
+            <div class="graph-head">
+              <h4>GraphRAG 컨텍스트</h4>
+              <span id="graph-stats" class="graph-stats"></span>
+            </div>
+            <div id="graph-viz" class="graph-viz">
+              <p class="status-text graph-empty">대화를 시작하면 관련 지식 그래프가 표시됩니다.</p>
+            </div>
+            <div id="graph-legend" class="graph-legend" hidden></div>
+            <details class="graph-facts">
+              <summary>사실 목록 (근거 원문)</summary>
+              <pre id="graph-context-body" class="graph-context-body status-text">대화를 시작하면 관련 지식 그래프 사실이 표시됩니다.</pre>
+            </details>
           </div>
         </div>
       </div>

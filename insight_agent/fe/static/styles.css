@@ -256,7 +256,88 @@ main { padding: 20px; max-width: 1320px; margin: 0 auto; }
   100% { box-shadow: 0 0 0 8px transparent; }
 }
 
-.graph-context h4 { margin: 0 0 8px; font-size: 13px; color: var(--muted); }
+.graph-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.graph-context h4 { margin: 0; font-size: 13px; color: var(--muted); }
+.graph-stats {
+  font-size: 11px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.graph-viz {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-height: 120px;
+  overflow: hidden;
+}
+.graph-empty { margin: 0; padding: 34px 12px; text-align: center; }
+.graph-svg { display: block; width: 100%; height: auto; }
+
+/* 간선: 구조적 관계는 조용히, 인터록(이상 사건)만 눈에 띄게 */
+.graph-edge {
+  stroke: var(--border);
+  stroke-width: 1.4;
+  transition: opacity 0.12s ease;
+}
+.graph-svg.is-focusing .graph-edge { stroke: var(--muted); }
+.graph-edge-event {
+  stroke: var(--danger);
+  stroke-width: 2;
+  stroke-dasharray: 5 3;
+}
+
+.graph-node { cursor: default; transition: opacity 0.12s ease; }
+.graph-dot { stroke: var(--panel); stroke-width: 1.5; }
+.graph-seed-ring { fill: none; stroke-width: 1.6; opacity: 0.55; }
+.graph-label {
+  font-size: 10px;
+  fill: var(--text);
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 2.5px;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.graph-node.is-seed .graph-label { font-weight: 700; }
+.is-dim { opacity: 0.15; }
+
+.graph-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 8px 0 10px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.graph-legend-item { display: inline-flex; align-items: center; gap: 5px; }
+.graph-swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.graph-swatch-event {
+  width: 14px;
+  height: 0;
+  border-radius: 0;
+  border-top: 2px dashed var(--danger);
+}
+
+.graph-facts > summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.graph-facts > summary:hover { color: var(--text); }
+
 .graph-context-body {
   background: var(--bg);
   border: 1px solid var(--border);
