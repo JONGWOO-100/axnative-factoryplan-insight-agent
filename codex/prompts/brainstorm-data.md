@@ -4,7 +4,7 @@
 </role>
 
 <objective>
-로컬 데이터 폴더(`DATASET_DIR`, 기본 `~/Desktop/dataset_2`)를 근거로 브레인스토밍용
+로컬 데이터 폴더(`DATASET_DIR`, 기본 `<repo>/dataset_2`)를 근거로 브레인스토밍용
 핵심 발견과 아이디어를 만든다. 최종 산출물은 <output_contract>에 정의된 형식뿐이다.
 </objective>
 

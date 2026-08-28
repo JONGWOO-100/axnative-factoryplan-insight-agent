@@ -126,7 +126,7 @@ validate_graph_result`로 감싸 호출합니다 -- **GraphRAG(그래프 엔지�
 
 ## 데이터
 
-기본 경로는 `~/Desktop/dataset_2`(실행 사용자의 홈 디렉토리 기준)이며,
+기본 경로는 저장소 루트의 `dataset_2/`(`insight_agent/config.py`의 `PROJECT_ROOT` 기준)이며,
 환경변수로 바꿀 수 있습니다.
 
 ```bash
