@@ -85,6 +85,20 @@ main { padding: 20px; max-width: 1320px; margin: 0 auto; }
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 
+.output-panel { display: none; }
+.output-panel.active { display: block; }
+
+.prd-banner {
+  display: none;
+  background: color-mix(in srgb, var(--warn) 12%, transparent);
+  border: 1px solid var(--warn);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
 .markdown-body {
   background: var(--panel);
   border: 1px solid var(--border);

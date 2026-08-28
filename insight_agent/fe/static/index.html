@@ -9,20 +9,11 @@
 <body>
   <header class="topbar">
     <div class="topbar-title">반도체 DS·DX 인사이트 에이전트</div>
-    <div class="topbar-controls">
-      <select id="lot-select"><option value="">로트 선택 (레거시 단건 실행)...</option></select>
-      <button id="run-btn">분석 실행</button>
-      <span id="run-status" class="status-text"></span>
-    </div>
   </header>
 
   <nav class="tabs">
     <button class="tab-btn active" data-tab="chat">대화형 분석</button>
-    <button class="tab-btn" data-tab="report">대화 리포트</button>
-    <button class="tab-btn" data-tab="prd">PRD (Day1)</button>
-    <button class="tab-btn" data-tab="trace">트레이스</button>
-    <button class="tab-btn" data-tab="hitl">승인 큐 (HITL)</button>
-    <button class="tab-btn" data-tab="hotl">HOTL 모니터</button>
+    <button class="tab-btn" data-tab="outputs">산출물</button>
   </nav>
 
   <main>
@@ -51,73 +42,32 @@
       </div>
     </section>
 
-    <section id="tab-report" class="tab-panel">
-      <div class="split">
-        <div class="split-left">
-          <h3>저장된 대화 리포트</h3>
-          <button id="report-refresh-btn">목록 새로고침</button>
-          <div id="report-list" class="list"></div>
-        </div>
-        <div class="split-right">
-          <div id="report-content" class="markdown-body">
-            왼쪽에서 리포트를 선택하세요. "대화형 분석" 탭에서 "리포트 저장" 버튼을
-            누르면 현재까지의 대화가 .md 파일로 저장됩니다. (AI PRD는 이 리포트를
-            참고해 사용자가 별도로 직접 작성하는 문서입니다.)
+    <section id="tab-outputs" class="tab-panel">
+      <div class="subtabs">
+        <button class="subtab-btn active" data-output="report">대화 리포트</button>
+        <button class="subtab-btn" data-output="prd">PRD</button>
+      </div>
+
+      <div id="output-report" class="output-panel active">
+        <div class="split">
+          <div class="split-left">
+            <h3>저장된 대화 리포트</h3>
+            <button id="report-refresh-btn">목록 새로고침</button>
+            <div id="report-list" class="list"></div>
+          </div>
+          <div class="split-right">
+            <div id="report-content" class="markdown-body">
+              왼쪽에서 리포트를 선택하세요. "대화형 분석" 탭에서 "리포트 저장" 버튼을
+              누르면 현재까지의 대화가 .md 파일로 저장됩니다.
+            </div>
           </div>
         </div>
       </div>
-    </section>
 
-    <section id="tab-prd" class="tab-panel">
-      <div id="prd-content" class="markdown-body">불러오는 중...</div>
-    </section>
-
-    <section id="tab-trace" class="tab-panel">
-      <div class="split">
-        <div class="split-left">
-          <h3>실행 이력</h3>
-          <div id="run-list" class="list"></div>
-        </div>
-        <div class="split-right">
-          <h3>트레이스 상세</h3>
-          <div id="run-detail" class="timeline">왼쪽에서 실행 이력을 선택하세요.</div>
-        </div>
+      <div id="output-prd" class="output-panel">
+        <div id="prd-banner" class="prd-banner"></div>
+        <div id="prd-content" class="markdown-body">불러오는 중...</div>
       </div>
-    </section>
-
-    <section id="tab-hitl" class="tab-panel">
-      <div class="subtabs">
-        <button class="subtab-btn active" data-status="pending">대기중</button>
-        <button class="subtab-btn" data-status="approved">승인됨</button>
-        <button class="subtab-btn" data-status="rejected">반려됨</button>
-      </div>
-      <table class="data-table" id="approval-table">
-        <thead>
-          <tr>
-            <th>승인 ID</th><th>로트</th><th>공정 노드</th><th>FDC 인터록</th>
-            <th>다이 수율</th><th>요약</th><th></th>
-          </tr>
-        </thead>
-        <tbody id="approval-body"></tbody>
-      </table>
-    </section>
-
-    <section id="tab-hotl" class="tab-panel">
-      <div class="hotl-header">
-        <h3>공정 노드 x 분기 다이 수율 모니터</h3>
-        <button id="hotl-refresh-btn">새로고침</button>
-      </div>
-      <div id="hotl-message" class="status-text"></div>
-      <h4>알림 (전분기 대비 급락)</h4>
-      <table class="data-table" id="hotl-alert-table">
-        <thead><tr><th>공정 노드</th><th>분기</th><th>변화폭(%p)</th></tr></thead>
-        <tbody id="hotl-alert-body"></tbody>
-      </table>
-      <h4>전체 추이</h4>
-      <table class="data-table" id="hotl-trend-table">
-        <thead><tr><th>공정 노드</th><th>분기</th><th>평균 다이수율(%)</th></tr></thead>
-        <tbody id="hotl-trend-body"></tbody>
-      </table>
     </section>
   </main>
 

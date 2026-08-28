@@ -38,6 +38,7 @@ from insight_agent.hotl import monitor
 
 STATIC_DIR = Path(__file__).parent / "static"
 PRD_PATH = PROJECT_ROOT / "docs" / "prd.md"
+PRD_TEMPLATE_PATH = PROJECT_ROOT / "docs" / "PRD_TEMPLATE.md"
 
 ROUTES: list[tuple[str, re.Pattern, Callable]] = []
 
@@ -66,12 +67,26 @@ def route(method: str, pattern: str):
     return deco
 
 
-# ---- API handlers: 기존 4개 뷰(PRD/트레이스/HITL/HOTL) ----------------------
+# ---- API handlers: PRD(Day1) + 레거시 트레이스/HITL/HOTL -------------------
+#
+# FE의 "산출물" 탭(PRD 서브탭)만 이 중 /api/prd를 쓴다. 트레이스/HITL/HOTL/lots/run
+# 엔드포인트는 더 이상 어떤 탭에서도 호출되지 않지만, runs/approvals/outputs 데이터와
+# 함께 그대로 남겨뒀다 -- CLI(`insight_agent.hitl.cli`)는 계속 이 데이터를 쓰고,
+# 필요하면 나중에 화면에 다시 노출할 수 있다.
 
 @route("GET", r"/api/prd")
 def api_prd(handler: "Handler", match: re.Match) -> Any:
-    text = PRD_PATH.read_text(encoding="utf-8") if PRD_PATH.exists() else "# PRD 없음\n\ndocs/prd.md가 없습니다."
-    return {"markdown": text}
+    if PRD_PATH.exists():
+        return {"markdown": PRD_PATH.read_text(encoding="utf-8"), "is_template": False}
+    # docs/prd.md는 교육생이 Day 1 실습으로 직접 작성하는 문서라 fresh clone에는
+    # 없다 -- 빈 화면 대신 작성 가이드 템플릿을 보여준다 (자동으로 prd.md를
+    # 만들어주지 않는다. 템플릿을 복사해 직접 쓰는 것도 실습의 일부다).
+    template = (
+        PRD_TEMPLATE_PATH.read_text(encoding="utf-8")
+        if PRD_TEMPLATE_PATH.exists()
+        else "# PRD 템플릿을 찾을 수 없습니다\n\ndocs/PRD_TEMPLATE.md가 없습니다."
+    )
+    return {"markdown": template, "is_template": True}
 
 
 @route("GET", r"/api/lots")

@@ -61,6 +61,17 @@ Claude Code와 Codex 양쪽 다 이 파일을 리포지토리를 열 때 자동�
   (`docs/prd.md`의 Day1 실습과 같은 성격), 턴 수 임계치 같은 자동 트리거를
   다시 넣지 않는다. 산출물은 `outputs/chat_report_*.md`에 쓴다 -- 이 경로를
   바꾸면 `.gitignore`도 함께 바꿔야 한다.
+- **FE는 탭 2개(대화형 분석 / 산출물)만 유지한다.** 트레이스·HITL 승인 큐·HOTL
+  모니터·PRD(Day1) 4개 탭과 상단 로트 선택+"분석 실행" 버튼(레거시 단건 실행)은
+  화면에서 제거했다 -- `fe/server.py`의 해당 API 라우트(`/api/runs`, `/api/lots`,
+  `/api/run`, `/api/approvals*`, `/api/hotl*`)와 `insight_agent/hitl/hotl` 모듈은
+  그대로 남겨뒀다(CLI가 계속 쓰고, 나중에 다시 화면에 노출할 수도 있다). 새
+  기능을 이 4개 영역에 추가한다면 백엔드/CLI에는 넣되, FE 탭을 다시 만들기
+  전에 정말 화면이 필요한지부터 확인한다.
+- **PRD 서브탭(`산출물 > PRD`)은 `docs/prd.md`가 없으면 `docs/PRD_TEMPLATE.md`를
+  대신 보여준다** (`fe/server.py::api_prd`가 `is_template` 플래그로 구분한다).
+  템플릿 파일은 git에 추적되는 일반 문서이므로 섹션을 고치면 바로 반영된다 --
+  `docs/prd.md` 자체(교육생 산출물)와 혼동하지 않는다.
 - 리포트 저장 버튼/형식/섹션 구성은 실습 목적에 맞게 교육생이 자유롭게
   바꿔도 되는 지점이다 -- `chat/report.py`가 의도적으로 얇게 만들어진 이유다.
 
@@ -110,3 +121,7 @@ Claude Code와 Codex 양쪽 다 이 파일을 리포지토리를 열 때 자동�
   `ANTHROPIC_API_KEY`/`OPENAI_API_KEY` 중 설정된 쪽을 자동 선택한다. 새로운
   LLM 호출 지점을 추가할 때는 반드시 이 모듈을 거치고, 키가 없을 때의 결정론적
   템플릿 대체 경로를 함께 만든다.
+- `.claude/commands/brainstorm-data.md`(Claude Code)와 `codex/prompts/brainstorm-data.md`
+  (Codex, `~/.codex/prompts/`에 복사해서 사용)는 같은 프롬프트를 두 런타임용으로
+  복제해둔 것이다. 프롬프트 내용을 고치면 두 파일을 함께 갱신한다 -- 원본 CSV/xlsx를
+  직접 읽지 않고 MCP 툴 결과만으로 분석하게 하는 게 이 프롬프트의 핵심 제약이다.

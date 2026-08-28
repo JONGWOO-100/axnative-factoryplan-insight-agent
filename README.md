@@ -72,8 +72,22 @@ GraphRAG 서브그래프(에이전트/공정/챔버/결함 노드)를 기반으�
 성격). 저장 버튼/리포트 형식은 실습 목적에 맞게 교육생이 자유롭게 고쳐도
 되는 지점으로 남겨뒀습니다(`insight_agent/chat/report.py`).
 
-기존 4개 탭(PRD(Day1)/트레이스/승인 큐(HITL)/HOTL 모니터)도 그대로 남아 있고,
-상단의 로트 선택 + "분석 실행" 버튼으로 레거시 단건 실행도 가능합니다.
+FE는 탭 2개(**대화형 분석** / **산출물**)로만 구성됩니다. 원래 있던
+트레이스·승인 큐(HITL)·HOTL 모니터·PRD(Day1) 4개 탭과 상단의 로트 선택 +
+"분석 실행" 버튼(레거시 단건 실행)은 화면에서 제거했습니다 -- 그 기능이
+필요 없어져서가 아니라, "대화형 분석" 하나로 같은 일(로트 원인 분석,
+FDC/수율/KPI 조회, HITL 게이트 통과)을 더 풍부한 컨텍스트(GraphRAG)와 함께
+할 수 있기 때문입니다. 백엔드 API와 데이터(`runs/`, `approvals/`,
+`outputs/`)는 그대로 남아 있어 `python -m insight_agent.hitl.cli list` 같은
+CLI는 계속 쓸 수 있고, 필요하면 나중에 다시 화면에 노출할 수 있습니다.
+
+**산출물** 탭은 서브탭 2개로 나뉩니다:
+
+- **대화 리포트** -- 위에서 설명한 `outputs/chat_report_*.md` 목록/뷰어.
+- **PRD** -- `docs/prd.md`가 있으면 그 내용을, 없으면 작성 가이드 템플릿인
+  [docs/PRD_TEMPLATE.md](docs/PRD_TEMPLATE.md)를 보여줍니다. 이 템플릿을
+  복사해 `docs/prd.md`로 저장한 뒤 각 섹션의 안내 질문을 참고해 **직접**
+  채워 넣는 것이 Day 1 실습입니다 -- 자동으로 만들어주지 않습니다.
 
 ## GraphRAG (지식 그래프)
 
@@ -170,7 +184,7 @@ insight_agent/
     run_pipeline.py       # 엔드투엔드 데모 진입점
   fe/
     server.py              # stdlib http.server 백엔드 (채팅/파이프라인/대화 리포트 API 포함)
-    static/                 # 바닐라 JS SPA (6개 탭)
+    static/                 # 바닐라 JS SPA (대화형 분석 / 산출물 2개 탭)
 ```
 
 ## 더 알아보기
@@ -206,6 +220,20 @@ Codex는 Claude Code의 `.mcp.json` 같은 프로젝트 스코프 자동 등록 
 `AGENTS.md`는 Codex CLI가 리포지토리를 열 때 자동으로 읽으므로 별도 설정이
 필요 없습니다 -- 레이어 경계 규칙이 Claude Code와 동일하게 적용됩니다.
 
+### 데이터 브레인스토밍 프롬프트 (토큰 최소화)
+
+로컬 `DATASET_DIR`을 직접 열어 분석하면 `fact_fdc_chamber_sensor.csv` 한 파일만
+2,500행/약 320KB라 컨텍스트를 금방 소모합니다. 대신 MCP 서버가 이미 필터링/집계해
+돌려주는 결과만으로 핵심 발견과 브레인스토밍 아이디어를 뽑아내는 프롬프트를
+준비해뒀습니다 (최대 5회 MCP 호출, 원본 CSV/xlsx는 한 번도 읽지 않음):
+
+- **Claude Code**: [.claude/commands/brainstorm-data.md](.claude/commands/brainstorm-data.md) —
+  프로젝트를 열면 자동 등록되며 `/brainstorm-data` (또는 `/brainstorm-data fdc`처럼
+  주제를 좁혀서)로 바로 실행합니다.
+- **Codex**: [codex/prompts/brainstorm-data.md](codex/prompts/brainstorm-data.md) —
+  Codex는 프로젝트 스코프 커스텀 프롬프트가 없으므로, 이 파일을 Codex의 커스텀
+  프롬프트 디렉터리(기본 `~/.codex/prompts/`)에 복사해두면 같은 이름으로 실행됩니다.
+
 ### LLM 프로바이더 (선택)
 
 대화형 에이전트의 응답 합성/대화 리포트 작성/통합 리포트 서술 요약은 다음
@@ -236,10 +264,13 @@ pytest -v
 ## 참고 문서
 
 - `docs/prd.md`은 이 repo에 포함하지 않습니다 — Day 1(데이터 분석 -> PRD 작성)
-  실습으로 각자 직접 작성하는 문서이기 때문입니다. 대화형 에이전트의
-  "리포트 저장" 버튼으로 만드는 `outputs/chat_report_*.md`("대화 리포트" 탭)는
-  이 PRD 작성 실습에 참고 자료로 쓰라고 만든 것이며, PRD 자체를 대신하지
-  않습니다 — 자동으로 생성되지도 않습니다(사용자가 버튼을 눌러야만 만들어짐).
+  실습으로 각자 직접 작성하는 문서이기 때문입니다. [docs/PRD_TEMPLATE.md](docs/PRD_TEMPLATE.md)는
+  그 작성 형식을 잡아주는, git에 추적되는 템플릿입니다 — 복사해서 `docs/prd.md`로
+  저장한 뒤 직접 채웁니다(FE의 "산출물 > PRD" 서브탭이 `docs/prd.md`가 없으면
+  이 템플릿을 대신 보여줍니다). 대화형 에이전트의 "리포트 저장" 버튼으로 만드는
+  `outputs/chat_report_*.md`("산출물 > 대화 리포트" 서브탭)는 이 PRD 작성 실습에
+  참고 자료로 쓰라고 만든 것이며, PRD 자체를 대신하지 않습니다 — 자동으로
+  생성되지도 않습니다(사용자가 버튼을 눌러야만 만들어짐).
 - [docs/TOKEN_OPTIMIZATION.md](docs/TOKEN_OPTIMIZATION.md) — Claude Code 토큰 최적화 가이드
 
 ## 다음 단계 (이 MVP 이후)

@@ -1,9 +1,10 @@
-// 바닐라 JS SPA -- 빌드 도구/프레임워크 없이 6개 탭(대화형분석/대화리포트/PRD/트레이스/HITL/HOTL)을 구현한다.
+// 바닐라 JS SPA -- 빌드 도구/프레임워크 없이 2개 탭(대화형분석/산출물)을 구현한다.
+// 트레이스/HITL 승인 큐/HOTL 모니터/레거시 단건 실행 UI는 제거됐다 -- 백엔드 API와
+// 데이터(runs/approvals/outputs)는 그대로 남아 있어 CLI(`insight_agent.hitl.cli` 등)로는
+// 계속 쓸 수 있고, 필요하면 나중에 다시 화면에 노출할 수 있다.
 
 const state = {
   activeTab: "chat",
-  approvalStatus: "pending",
-  selectedRunId: null,
   chatSessionId: null,
   chatPolling: false,
   selectedReportFilename: null,
@@ -119,11 +120,7 @@ function showTab(tab) {
 }
 
 function onTabShown(tab) {
-  if (tab === "prd") loadPrd();
-  if (tab === "trace") loadRuns();
-  if (tab === "hitl") loadApprovals();
-  if (tab === "hotl") loadHotl();
-  if (tab === "report") loadReportList();
+  if (tab === "outputs") refreshActiveOutputPanel();
 }
 
 // ---- 대화형 분석 탭 ---------------------------------------------------------
@@ -218,7 +215,7 @@ async function saveReport() {
   try {
     const { report_path } = await api(`/api/chat/sessions/${state.chatSessionId}/report`, { method: "POST" });
     const link = el("button", { type: "button", class: "report-ready-link", text: `리포트가 저장되었습니다 -- 보러 가기 (${report_path.split("/").pop()})` });
-    link.addEventListener("click", () => showTab("report"));
+    link.addEventListener("click", () => showTab("outputs"));
     document.getElementById("chat-messages").appendChild(link);
     document.getElementById("chat-messages").scrollTop = document.getElementById("chat-messages").scrollHeight;
   } catch (err) {
@@ -231,7 +228,6 @@ async function saveReport() {
 
 async function pollTurn(runId) {
   state.chatPolling = true;
-  const statusEl = document.getElementById("run-status");
   while (true) {
     let turnState, traceSteps;
     try {
@@ -283,14 +279,33 @@ function setupChat() {
   document.getElementById("chat-save-report-btn").addEventListener("click", saveReport);
 }
 
-// ---- 대화 리포트 탭 ----------------------------------------------------------
+// ---- 산출물 탭: 대화 리포트 / PRD 서브탭 -------------------------------------
+
+function setupOutputSubtabs() {
+  document.querySelectorAll(".subtab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".subtab-btn").forEach((b) => b.classList.remove("active"));
+      document.querySelectorAll(".output-panel").forEach((p) => p.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById(`output-${btn.dataset.output}`).classList.add("active");
+      refreshActiveOutputPanel();
+    });
+  });
+}
+
+function refreshActiveOutputPanel() {
+  const active = document.querySelector(".subtab-btn.active");
+  const which = active ? active.dataset.output : "report";
+  if (which === "prd") loadPrd();
+  else loadReportList();
+}
 
 async function loadReportList() {
   const items = await api("/api/chat/reports");
   const list = document.getElementById("report-list");
   list.innerHTML = "";
   if (!items.length) {
-    list.appendChild(el("div", { class: "status-text", text: "아직 저장된 리포트가 없습니다. 대화형 분석 탭에서 \"리포트 저장\" 버튼을 눌러보세요." }));
+    list.appendChild(el("div", { class: "status-text", text: "아직 저장된 리포트가 없습니다. \"대화형 분석\" 탭에서 \"리포트 저장\" 버튼을 눌러보세요." }));
     return;
   }
   for (const item of items) {
@@ -311,172 +326,21 @@ async function loadReportList() {
 
 document.getElementById("report-refresh-btn").addEventListener("click", loadReportList);
 
-// ---- PRD(Day1) 탭 -----------------------------------------------------------
-
+// PRD는 자동 생성되지 않는다 -- docs/prd.md가 없으면 docs/PRD_TEMPLATE.md를 대신
+// 보여준다. 교육생은 이 템플릿을 복사해 docs/prd.md를 직접 작성한다.
 async function loadPrd() {
-  const { markdown } = await api("/api/prd");
+  const { markdown, is_template } = await api("/api/prd");
+  const banner = document.getElementById("prd-banner");
+  banner.textContent = is_template
+    ? "docs/prd.md가 아직 없습니다. 아래는 작성 가이드 템플릿(docs/PRD_TEMPLATE.md)입니다 -- 복사해서 docs/prd.md로 직접 작성해보세요."
+    : "";
+  banner.style.display = is_template ? "block" : "none";
   document.getElementById("prd-content").innerHTML = renderMarkdown(markdown);
 }
-
-// ---- 트레이스 탭 ------------------------------------------------------------
-
-async function loadRuns() {
-  const runs = await api("/api/runs");
-  const list = document.getElementById("run-list");
-  list.innerHTML = "";
-  if (!runs.length) {
-    list.appendChild(el("div", { class: "status-text", text: "아직 실행 기록이 없습니다." }));
-    return;
-  }
-  for (const run of runs) {
-    const item = el("div", {
-      class: "list-item" + (run.run_id === state.selectedRunId ? " active" : ""),
-      text: `${run.lot_id || "(로트 미상)"} · ${run.step_count}단계`,
-    });
-    item.addEventListener("click", () => {
-      state.selectedRunId = run.run_id;
-      document.querySelectorAll(".list-item").forEach((n) => n.classList.remove("active"));
-      item.classList.add("active");
-      loadRunDetail(run.run_id);
-    });
-    list.appendChild(item);
-  }
-}
-
-async function loadRunDetail(runId) {
-  const records = await api(`/api/runs/${runId}`);
-  const container = document.getElementById("run-detail");
-  container.innerHTML = "";
-  for (const rec of records) {
-    const step = el("div", { class: "timeline-step" });
-    step.appendChild(el("div", { class: "step-name", text: rec.step }));
-    step.appendChild(el("pre", { text: JSON.stringify(rec.output, null, 2) }));
-    container.appendChild(step);
-  }
-}
-
-// ---- HITL 탭 ---------------------------------------------------------------
-
-function setupHitlSubtabs() {
-  document.querySelectorAll(".subtab-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".subtab-btn").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      state.approvalStatus = btn.dataset.status;
-      loadApprovals();
-    });
-  });
-}
-
-async function loadApprovals() {
-  const items = await api(`/api/approvals?status=${state.approvalStatus}`);
-  const body = document.getElementById("approval-body");
-  body.innerHTML = "";
-  for (const item of items) {
-    const report = item.report;
-    const tr = el("tr");
-    tr.appendChild(el("td", { text: item.approval_id }));
-    tr.appendChild(el("td", { text: `${report.lot_id}` }));
-    tr.appendChild(el("td", { text: report.product_node }));
-    tr.appendChild(el("td", {
-      html: `<span class="badge badge-critical">${report.fdc_interlock_count}건</span>`,
-    }));
-    tr.appendChild(el("td", { text: report.die_yield_pct != null ? `${report.die_yield_pct}%` : "-" }));
-    tr.appendChild(el("td", { text: report.narrative_summary || "-" }));
-
-    const actionCell = el("td");
-    if (state.approvalStatus === "pending") {
-      const approveBtn = el("button", { text: "승인" });
-      approveBtn.addEventListener("click", async () => {
-        await api(`/api/approvals/${item.approval_id}/approve`, { method: "POST" });
-        loadApprovals();
-      });
-      const rejectBtn = el("button", { text: "반려" });
-      rejectBtn.addEventListener("click", async () => {
-        const reason = prompt("반려 사유를 입력하세요", "") || "";
-        await api(`/api/approvals/${item.approval_id}/reject`, {
-          method: "POST",
-          body: JSON.stringify({ reason }),
-        });
-        loadApprovals();
-      });
-      actionCell.appendChild(approveBtn);
-      actionCell.appendChild(rejectBtn);
-    } else if (item.rejected_reason) {
-      actionCell.textContent = `사유: ${item.rejected_reason}`;
-    }
-    tr.appendChild(actionCell);
-    body.appendChild(tr);
-  }
-  if (!items.length) {
-    body.appendChild(el("tr", {}, [el("td", { colspan: "7", class: "status-text", text: "해당 상태의 건이 없습니다." })]));
-  }
-}
-
-// ---- HOTL 탭 ---------------------------------------------------------------
-
-async function loadHotl() {
-  const snapshot = await api("/api/hotl");
-  document.getElementById("hotl-message").textContent = snapshot.message || "";
-
-  const alertBody = document.getElementById("hotl-alert-body");
-  alertBody.innerHTML = "";
-  for (const a of snapshot.alerts || []) {
-    const tr = el("tr");
-    tr.appendChild(el("td", { text: a.product_node }));
-    tr.appendChild(el("td", { text: a.quarter }));
-    tr.appendChild(el("td", { html: `<span class="badge badge-critical">${a.delta_pp}%p</span>` }));
-    alertBody.appendChild(tr);
-  }
-  if (!(snapshot.alerts || []).length) {
-    alertBody.appendChild(el("tr", {}, [el("td", { colspan: "3", class: "status-text", text: "현재 알림이 없습니다." })]));
-  }
-
-  const trendBody = document.getElementById("hotl-trend-body");
-  trendBody.innerHTML = "";
-  for (const t of (snapshot.trend || []).slice(-40)) {
-    const tr = el("tr");
-    tr.appendChild(el("td", { text: t.product_node }));
-    tr.appendChild(el("td", { text: t.quarter }));
-    tr.appendChild(el("td", { text: t.die_yield_pct.toFixed(1) }));
-    trendBody.appendChild(tr);
-  }
-}
-
-document.getElementById("hotl-refresh-btn").addEventListener("click", async () => {
-  await api("/api/hotl/refresh", { method: "POST" });
-  loadHotl();
-});
-
-// ---- 상단 바: 로트 선택 + 분석 실행 (레거시 단건 실행 경로) -------------------
-
-async function loadLots() {
-  const lots = await api("/api/lots");
-  const select = document.getElementById("lot-select");
-  for (const l of lots) {
-    select.appendChild(el("option", { value: l.lot_id, text: `${l.lot_id} (${l.product_node})` }));
-  }
-}
-
-document.getElementById("run-btn").addEventListener("click", async () => {
-  const lotId = document.getElementById("lot-select").value;
-  const statusEl = document.getElementById("run-status");
-  if (!lotId) { statusEl.textContent = "로트를 먼저 선택하세요."; return; }
-  statusEl.textContent = "실행 중...";
-  try {
-    const outcome = await api("/api/run", { method: "POST", body: JSON.stringify({ lot_id: lotId }) });
-    statusEl.textContent = `완료: ${outcome.status} (run ${outcome.run_id})`;
-    if (state.activeTab === "trace") loadRuns();
-    if (state.activeTab === "hitl") loadApprovals();
-  } catch (err) {
-    statusEl.textContent = `오류: ${err.message}`;
-  }
-});
 
 // ---- 초기화 ----------------------------------------------------------------
 
 setupTabs();
-setupHitlSubtabs();
+setupOutputSubtabs();
 setupChat();
-loadLots();
 initChat();
