@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 
 from insight_agent.agents import orchestrator
-from insight_agent.config import RUNS_DIR
+from insight_agent.harness import trace as trace_module
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
@@ -21,7 +21,9 @@ def _use_fixture_dataset(monkeypatch):
 
 
 def _read_trace(run_id: str) -> list[dict]:
-    path = RUNS_DIR / f"{run_id}.jsonl"
+    # conftest의 isolate_writable_dirs가 갈아끼운 경로를 그대로 따라가야 한다.
+    # config.RUNS_DIR을 직접 읽으면 격리 전 실제 디렉터리를 보게 된다.
+    path = trace_module.RUNS_DIR / f"{run_id}.jsonl"
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
 
 
