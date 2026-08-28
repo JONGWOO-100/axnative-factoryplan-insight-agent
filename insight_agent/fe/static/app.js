@@ -524,6 +524,7 @@ async function pollTurn(runId) {
     }
     const result = turnState.result;
     appendChatBubble("assistant", result.reply);
+    renderTurnSummary(traceSteps);
     renderSuggestions(result.suggested_questions);
     updateTurnCount(result.turn_count);
     break;
@@ -617,3 +618,384 @@ setupTabs();
 setupOutputSubtabs();
 setupChat();
 initChat();
+
+// ---------------------------------------------------------------------------
+// 수치 요약 도식화
+//
+// 리포트에 적힌 숫자를 문장으로만 두면 크기 비교가 안 된다. 턴이 끝나면 그 턴이
+// 실제로 만든 수치를 트레이스에서 읽어 카드로 그린다 -- 새 판단을 하지 않고
+// 이미 계산된 값만 표현한다(AGENTS.md: fe/에 도메인 판단 로직을 넣지 않는다).
+//
+// 형식 선택 근거:
+//  - 스케일이 다른 지표를 한 축에 얹지 않는다. DX KPI 8종은 stat tile,
+//    36개월 추이는 각자 축을 갖는 스파크라인 small multiples로 나눈다.
+//  - 로트 수율과 노드 평균은 동급 계열이 아니라 '값과 기준'이므로 막대 하나 +
+//    기준선으로 그린다.
+//  - 근거 구성(인터록/겹침/VM초과)만 계열이 셋이라 범례를 붙이고, 세그먼트마다
+//    직접 라벨을 단다. 라이트 모드에서 series-2/3 대비가 3:1 미만이어서
+//    라벨이 필수 완화 조치다.
+// ---------------------------------------------------------------------------
+
+const KPI_LABELS = {
+  daily_lake_ingest_tb: "레이크 유입량 (TB/일)",
+  ai_closed_loop_decision_rate_pct: "AI 폐루프 의사결정률 (%)",
+  oht_dispatch_latency_ms: "OHT 반송 지연 (ms)",
+  data_lake_quality_score_pct: "데이터 품질 점수 (%)",
+  unplanned_downtime_hours: "미계획 다운타임 (h)",
+  monthly_energy_saving_mwh: "월 에너지 절감 (MWh)",
+  active_ai_models_count: "운영 AI 모델 수",
+  semiconductor_ds_cpk: "공정능력 Cpk",
+};
+
+const fmt = (v, digits = 2) => {
+  if (v === null || v === undefined || Number.isNaN(v)) return "—";
+  const n = Number(v);
+  return Number.isInteger(n) ? n.toLocaleString() : n.toFixed(digits);
+};
+
+function vizBlock(title, node, note) {
+  const wrap = el("div", { class: "viz-block" }, [el("span", { class: "viz-block-title", text: title })]);
+  wrap.appendChild(node);
+  if (note) wrap.appendChild(el("p", { class: "viz-note", text: note }));
+  return wrap;
+}
+
+function vizLegend(items) {
+  const box = el("div", { class: "viz-legend" });
+  items.forEach(({ label, color }) => {
+    const it = el("span", { class: "viz-legend-item" });
+    it.appendChild(el("i", { class: "viz-legend-swatch", style: `background:${color}` }));
+    it.appendChild(document.createTextNode(label));
+    box.appendChild(it);
+  });
+  return box;
+}
+
+/** 값 막대 하나 + 점선 기준선. 두 값을 나란한 계열로 두지 않는다. */
+function chartBarVsReference({ value, reference, unit, valueLabel, refLabel }) {
+  const W = 320, H = 62, PAD_L = 4, PAD_R = 4, BAR_Y = 14, BAR_H = 18;
+  const max = Math.max(value, reference) * 1.12 || 1;
+  const scale = (v) => PAD_L + ((W - PAD_L - PAD_R) * v) / max;
+  const svg = svgEl("svg", {
+    class: "viz-chart", viewBox: `0 0 ${W} ${H}`, role: "img",
+    "aria-label": `${valueLabel} ${fmt(value)}${unit}, ${refLabel} ${fmt(reference)}${unit}`,
+  });
+  const bar = svgEl("rect", {
+    x: PAD_L, y: BAR_Y, width: Math.max(scale(value) - PAD_L, 2), height: BAR_H,
+    rx: 4, fill: "var(--viz-series-1)",
+  });
+  bar.appendChild(svgEl("title")).textContent = `${valueLabel} ${fmt(value)}${unit}`;
+  svg.appendChild(bar);
+  const vx = Math.min(scale(value) + 6, W - 46);
+  const vl = svgEl("text", { x: vx, y: BAR_Y + 13, class: "viz-value-label" });
+  vl.textContent = `${fmt(value)}${unit}`;
+  svg.appendChild(vl);
+  const rx = scale(reference);
+  svg.appendChild(svgEl("line", { x1: rx, y1: BAR_Y - 6, x2: rx, y2: BAR_Y + BAR_H + 6, class: "viz-ref-line" }));
+  const rl = svgEl("text", {
+    x: Math.min(rx + 5, W - 4), y: H - 8, class: "viz-tick",
+    "text-anchor": rx > W - 90 ? "end" : "start",
+  });
+  rl.textContent = `${refLabel} ${fmt(reference)}${unit}`;
+  svg.appendChild(rl);
+  return svg;
+}
+
+/** 누적 막대 하나. 세그먼트 사이에 서피스 색 간격을 두고 라벨을 직접 단다. */
+function chartStackedBar(parts, totalLabel) {
+  const shown = parts.filter((p) => p.value > 0);
+  const total = shown.reduce((s, p) => s + p.value, 0);
+  const W = 320, H = 52, BAR_Y = 6, BAR_H = 20, GAP = 2;
+  const svg = svgEl("svg", {
+    class: "viz-chart", viewBox: `0 0 ${W} ${H}`, role: "img",
+    "aria-label": shown.map((p) => `${p.label} ${p.value}`).join(", "),
+  });
+  if (!total) {
+    const t = svgEl("text", { x: 4, y: 22, class: "viz-tick" });
+    t.textContent = "이상 없음";
+    svg.appendChild(t);
+    return svg;
+  }
+  let x = 0;
+  shown.forEach((p, i) => {
+    const w = ((W - GAP * (shown.length - 1)) * p.value) / total;
+    const seg = svgEl("rect", {
+      x: x.toFixed(1), y: BAR_Y, width: Math.max(w, 2).toFixed(1), height: BAR_H,
+      rx: i === 0 || i === shown.length - 1 ? 4 : 0, fill: p.color,
+    });
+    seg.appendChild(svgEl("title")).textContent = `${p.label}: ${p.value}건`;
+    svg.appendChild(seg);
+    // 대비가 낮은 색이 있어 라벨은 막대 밖 아래쪽에 둔다
+    const lab = svgEl("text", {
+      x: Math.min(Math.max(x + w / 2, 16), W - 16), y: BAR_Y + BAR_H + 13,
+      class: "viz-value-label", "text-anchor": "middle",
+    });
+    lab.textContent = `${p.value}`;
+    svg.appendChild(lab);
+    x += w + GAP;
+  });
+  const t = svgEl("text", { x: 0, y: H - 2, class: "viz-tick" });
+  t.textContent = totalLabel;
+  svg.appendChild(t);
+  return svg;
+}
+
+function chartSparkline(values, unit) {
+  const W = 118, H = 30, PAD = 3;
+  const svg = svgEl("svg", { class: "viz-chart", viewBox: `0 0 ${W} ${H}`, "aria-hidden": "true" });
+  const min = Math.min(...values), max = Math.max(...values);
+  const span = max - min || 1;
+  const pts = values.map((v, i) => [
+    PAD + ((W - PAD * 2) * i) / Math.max(values.length - 1, 1),
+    H - PAD - ((H - PAD * 2) * (v - min)) / span,
+  ]);
+  svg.appendChild(svgEl("polyline", {
+    points: pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" "),
+    fill: "none", stroke: "var(--viz-series-1)", "stroke-width": "2",
+    "stroke-linejoin": "round", "stroke-linecap": "round",
+  }));
+  const [ex, ey] = pts[pts.length - 1];
+  svg.appendChild(svgEl("circle", { cx: ex.toFixed(1), cy: ey.toFixed(1), r: 2.6, fill: "var(--viz-series-1)" }));
+  svg.appendChild(svgEl("title")).textContent = `${fmt(min)} ~ ${fmt(max)}${unit || ""} (${values.length}개 구간)`;
+  return svg;
+}
+
+function chartHistogram(values, unit, binCount = 12) {
+  const W = 320, H = 84, PAD_B = 16, PAD_T = 12;
+  const min = Math.min(...values), max = Math.max(...values);
+  const span = max - min || 1;
+  const bins = new Array(binCount).fill(0);
+  values.forEach((v) => {
+    const i = Math.min(binCount - 1, Math.floor(((v - min) / span) * binCount));
+    bins[i] += 1;
+  });
+  const peak = Math.max(...bins) || 1;
+  const bw = W / binCount;
+  const svg = svgEl("svg", {
+    class: "viz-chart", viewBox: `0 0 ${W} ${H}`, role: "img",
+    "aria-label": `분포: ${fmt(min)} ~ ${fmt(max)}${unit || ""}, ${values.length}건`,
+  });
+  bins.forEach((c, i) => {
+    const h = ((H - PAD_B - PAD_T) * c) / peak;
+    const bar = svgEl("rect", {
+      x: (i * bw + 1).toFixed(1), y: (H - PAD_B - h).toFixed(1),
+      width: (bw - 2).toFixed(1), height: Math.max(h, c ? 1.5 : 0).toFixed(1),
+      rx: 3, fill: "var(--viz-series-1)",
+    });
+    const lo = min + (span * i) / binCount, hi = min + (span * (i + 1)) / binCount;
+    bar.appendChild(svgEl("title")).textContent = `${fmt(lo)} ~ ${fmt(hi)}${unit || ""}: ${c}건`;
+    svg.appendChild(bar);
+  });
+  svg.appendChild(svgEl("line", { x1: 0, y1: H - PAD_B, x2: W, y2: H - PAD_B, class: "viz-axis" }));
+  [[0, `${fmt(min)}${unit || ""}`, "start"], [W, `${fmt(max)}${unit || ""}`, "end"]].forEach(([x, txt, anchor]) => {
+    const t = svgEl("text", { x, y: H - 4, class: "viz-tick", "text-anchor": anchor });
+    t.textContent = txt;
+    svg.appendChild(t);
+  });
+  const pk = svgEl("text", { x: W / 2, y: 9, class: "viz-tick", "text-anchor": "middle" });
+  pk.textContent = `최다 구간 ${peak}건 · 총 ${values.length}건`;
+  svg.appendChild(pk);
+  return svg;
+}
+
+function categoryCounts(records, field) {
+  const m = new Map();
+  records.forEach((r) => {
+    const k = r[field];
+    if (k === undefined || k === null) return;
+    m.set(k, (m.get(k) || 0) + 1);
+  });
+  return [...m.entries()].sort((a, b) => b[1] - a[1]);
+}
+
+function chartCategoryBars(pairs) {
+  const rows = pairs.slice(0, 6);
+  const W = 320, ROW = 19, LABEL_W = 118;
+  const H = rows.length * ROW + 4;
+  const peak = Math.max(...rows.map((r) => r[1])) || 1;
+  const svg = svgEl("svg", {
+    class: "viz-chart", viewBox: `0 0 ${W} ${H}`, role: "img",
+    "aria-label": rows.map(([k, v]) => `${k} ${v}건`).join(", "),
+  });
+  rows.forEach(([k, v], i) => {
+    const y = i * ROW + 3;
+    const label = svgEl("text", { x: 0, y: y + 11, class: "viz-tick" });
+    label.textContent = String(k).length > 15 ? `${String(k).slice(0, 14)}…` : String(k);
+    svg.appendChild(label);
+    const w = ((W - LABEL_W - 42) * v) / peak;
+    const bar = svgEl("rect", {
+      x: LABEL_W, y, width: Math.max(w, 2).toFixed(1), height: 13, rx: 3.5,
+      fill: "var(--viz-series-1)",
+    });
+    bar.appendChild(svgEl("title")).textContent = `${k}: ${v}건`;
+    svg.appendChild(bar);
+    const val = svgEl("text", { x: LABEL_W + w + 5, y: y + 11, class: "viz-value-label" });
+    val.textContent = String(v);
+    svg.appendChild(val);
+  });
+  return svg;
+}
+
+function tileRow(entries) {
+  const grid = el("div", { class: "viz-tiles" });
+  entries.forEach(({ label, value }) => {
+    grid.appendChild(el("div", { class: "viz-tile" }, [
+      el("span", { class: "viz-tile-label", text: label }),
+      el("div", { class: "viz-tile-value", text: value }),
+    ]));
+  });
+  return grid;
+}
+
+/** 통합(인과) 리포트 요약 -- 이 프로젝트에서 '리포트'라고 부르는 산출물. */
+function summarizeReport(report) {
+  const frag = document.createDocumentFragment();
+  const delta = report.die_yield_delta_pp;
+  const verdict = report.causal_verdict || {};
+
+  if (delta !== null && delta !== undefined) {
+    frag.appendChild(el("div", { class: "viz-hero" }, [
+      el("span", { class: "viz-hero-value", text: `${delta > 0 ? "+" : ""}${fmt(delta)}%p` }),
+      el("span", { class: "viz-hero-label", text: "동일 공정 노드 평균 대비 다이 수율" }),
+    ]));
+  }
+  if (verdict.verdict) {
+    frag.appendChild(el("span", { class: "viz-badge viz-badge-unknown" }, [
+      el("i", { class: "viz-badge-icon", text: "?" }),
+      el("span", { text: `인과 판정 ${verdict.verdict} · ${verdict.reason || ""}` }),
+    ]));
+  }
+  if (report.product_node_avg_die_yield_pct != null) {
+    frag.appendChild(vizBlock("다이 수율", chartBarVsReference({
+      value: report.die_yield_pct, reference: report.product_node_avg_die_yield_pct,
+      unit: "%", valueLabel: "이 로트", refLabel: "노드 평균",
+    })));
+  }
+
+  // 근거 구성: 인터록과 VM초과가 겹치는 만큼은 하나의 근거다
+  const il = report.fdc_interlock_count || 0;
+  const vm = report.fdc_vm_error_anomaly_count || 0;
+  const both = report.fdc_interlock_vm_coincident_count || 0;
+  const parts = [
+    { label: "인터록만", value: il - both, color: "var(--viz-series-1)" },
+    { label: "인터록 ∩ VM오차 (같은 행)", value: both, color: "var(--viz-series-2)" },
+    { label: "VM오차만", value: vm - both, color: "var(--viz-series-3)" },
+  ];
+  const evidence = vizBlock(
+    "FDC 근거 구성",
+    chartStackedBar(parts, `이상 ${report.fdc_anomaly_row_count ?? 0}행 / 검사 ${report.fdc_row_count ?? 0}행`),
+    both > 0 && both === il && both === vm
+      ? "인터록과 VM오차가 전부 같은 행이다 — 근거는 둘이 아니라 하나다."
+      : undefined
+  );
+  const usedParts = parts.filter((p) => p.value > 0);
+  if (usedParts.length >= 2) evidence.appendChild(vizLegend(usedParts));
+  frag.appendChild(evidence);
+
+  frag.appendChild(tileRow([
+    { label: "웨이퍼 수율", value: `${fmt(report.wafer_yield_pct)}%` },
+    { label: "폐기 웨이퍼", value: `${fmt(report.scrap_wafer_qty)}장` },
+    { label: "주요 결함", value: report.major_defect_mechanism || "—" },
+  ]));
+
+  const kpi = report.dx_kpi_context;
+  if (kpi) {
+    const entries = Object.keys(KPI_LABELS)
+      .filter((k) => kpi[k] !== undefined)
+      .map((k) => ({ label: KPI_LABELS[k], value: fmt(kpi[k]) }));
+    if (entries.length) {
+      // 스케일이 전부 달라 한 축에 얹지 않는다 -- 타일로 나란히 둔다
+      frag.appendChild(vizBlock(`DX KPI 컨텍스트 (${kpi.year_month})`, tileRow(entries)));
+    }
+  }
+  return frag;
+}
+
+function summarizeKpiRecords(records) {
+  const frag = document.createDocumentFragment();
+  const months = records.map((r) => r.year_month);
+  const grid = el("div", { class: "viz-spark-grid" });
+  Object.entries(KPI_LABELS).forEach(([key, label]) => {
+    const vals = records.map((r) => r[key]).filter((v) => typeof v === "number");
+    if (vals.length < 2) return;
+    const cell = el("div", { class: "viz-spark" }, [
+      el("span", { class: "viz-spark-label", text: label }),
+      el("div", { class: "viz-spark-value", text: fmt(vals[vals.length - 1]) }),
+    ]);
+    cell.appendChild(chartSparkline(vals, ""));
+    grid.appendChild(cell);
+  });
+  if (!grid.childNodes.length) return frag;
+  frag.appendChild(vizBlock(
+    `DX KPI 추이 (${months[0]} ~ ${months[months.length - 1]}, ${records.length}개월)`,
+    grid,
+    "지표마다 단위와 범위가 달라 각각 자기 축으로 그린다. 숫자는 마지막 달 값."
+  ));
+  return frag;
+}
+
+function summarizeYieldRecords(records) {
+  const frag = document.createDocumentFragment();
+  const yields = records.map((r) => r.die_yield_pct).filter((v) => typeof v === "number");
+  if (yields.length) {
+    const avg = yields.reduce((a, b) => a + b, 0) / yields.length;
+    frag.appendChild(el("div", { class: "viz-hero" }, [
+      el("span", { class: "viz-hero-value", text: `${fmt(avg)}%` }),
+      el("span", { class: "viz-hero-label", text: `조회된 ${records.length}개 로트의 평균 다이 수율` }),
+    ]));
+    frag.appendChild(vizBlock("다이 수율 분포", chartHistogram(yields, "%")));
+  }
+  const defects = categoryCounts(records, "major_defect_mechanism");
+  if (defects.length) frag.appendChild(vizBlock("결함 유형별 로트 수", chartCategoryBars(defects)));
+  return frag;
+}
+
+function summarizeFdcRecords(records) {
+  const frag = document.createDocumentFragment();
+  const interlocks = records.filter((r) => Number(r.fdc_interlock_flag) === 1).length;
+  frag.appendChild(el("div", { class: "viz-hero" }, [
+    el("span", { class: "viz-hero-value", text: String(records.length) }),
+    el("span", { class: "viz-hero-label", text: `이상 행 (이 중 인터록 ${interlocks}건)` }),
+  ]));
+  const errs = records.map((r) => r.vm_error_pct).filter((v) => typeof v === "number");
+  if (errs.length) frag.appendChild(vizBlock("가상계측(VM) 오차율 분포", chartHistogram(errs, "%")));
+  const chambers = categoryCounts(records, "chamber_id");
+  if (chambers.length) frag.appendChild(vizBlock("챔버별 이상 건수", chartCategoryBars(chambers)));
+  return frag;
+}
+
+const SUMMARY_SOURCES = [
+  { step: "integration_agent.build_causal_report", domain: "통합(인과) 리포트", build: summarizeReport },
+  { step: "kpi_agent.get_dx_kpi_trend", domain: "DX KPI", build: summarizeKpiRecords },
+  { step: "yield_agent.get_yield_defects", domain: "수율", build: summarizeYieldRecords },
+  { step: "fdc_agent.get_fdc_anomalies", domain: "FDC 설비", build: summarizeFdcRecords },
+];
+
+/** 턴이 끝난 뒤 그 턴의 수치를 카드로 그린다. 그릴 게 없으면 아무것도 안 만든다. */
+function renderTurnSummary(steps) {
+  for (const src of SUMMARY_SOURCES) {
+    const hit = steps.find((s) => s.step === src.step);
+    if (!hit || !hit.output) continue;
+    const payload = hit.output;
+    const hasData = Array.isArray(payload) ? payload.length : Object.keys(payload).length;
+    if (!hasData) continue;
+    let body;
+    try {
+      body = src.build(payload);
+    } catch (err) {
+      return; // 요약은 부가 기능이다 -- 실패해도 대화를 막지 않는다
+    }
+    if (!body || !body.childNodes.length) return;
+    const card = el("section", { class: "viz-card viz-root" }, [
+      el("div", { class: "viz-card-head" }, [
+        el("h5", { text: "수치 요약" }),
+        el("span", { class: "viz-domain", text: src.domain }),
+      ]),
+    ]);
+    card.appendChild(body);
+    const messages = document.getElementById("chat-messages");
+    messages.appendChild(card);
+    messages.scrollTop = messages.scrollHeight;
+    return;
+  }
+}
