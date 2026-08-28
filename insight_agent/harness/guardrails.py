@@ -14,9 +14,18 @@ REQUIRED_REPORT_FIELDS = {
     "fdc_interlock_count",
     "fdc_vm_error_anomaly_count",
     "die_yield_pct",
+    "causal_verdict",
 }
 
 REQUIRED_GRAPH_FIELDS = {"seed_nodes", "nodes", "facts", "context_text"}
+
+# 이 리포트가 낼 수 있는 인과 판정은 UNKNOWN 하나뿐이다. 단일 로트 관측에는 비교군이
+# 없어 인과를 세울 수 없고, dataset_2 전체에서도 인터록과 수율의 상관이 +0.005다
+# (decisions.md D-004/D-007). 나중에 제대로 된 인과 분석을 붙인다면 이 집합을 넓히는
+# 것이 그 변경의 일부여야 한다 -- 여기서 걸리는 것이 의도된 마찰이다.
+ALLOWED_CAUSAL_VERDICTS = {"UNKNOWN"}
+
+REQUIRED_VERDICT_FIELDS = {"verdict", "reason", "explanation"}
 
 
 def validate_report(report: dict) -> None:
@@ -27,6 +36,24 @@ def validate_report(report: dict) -> None:
         raise ValueError("fdc_interlock_count must be >= 0")
     if report["fdc_vm_error_anomaly_count"] < 0:
         raise ValueError("fdc_vm_error_anomaly_count must be >= 0")
+    _validate_causal_verdict(report["causal_verdict"])
+
+
+def _validate_causal_verdict(verdict: object) -> None:
+    """인과 판정이 사유와 함께 붙어 있는지, 그리고 확정 주장이 아닌지 확인한다."""
+    if not isinstance(verdict, dict):
+        raise ValueError("causal_verdict must be an object")
+    missing = REQUIRED_VERDICT_FIELDS - verdict.keys()
+    if missing:
+        raise ValueError(f"causal_verdict missing required fields: {missing}")
+    if verdict["verdict"] not in ALLOWED_CAUSAL_VERDICTS:
+        raise ValueError(
+            f"causal_verdict.verdict must be one of {sorted(ALLOWED_CAUSAL_VERDICTS)}, "
+            f"got {verdict['verdict']!r}"
+        )
+    # 사유 없는 UNKNOWN은 "모르겠다"가 아니라 판단 회피다.
+    if not str(verdict["reason"]).strip() or not str(verdict["explanation"]).strip():
+        raise ValueError("causal_verdict must carry a non-empty reason and explanation")
 
 
 def validate_graph_result(result: dict) -> None:

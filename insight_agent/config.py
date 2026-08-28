@@ -22,3 +22,7 @@ DIE_YIELD_DROP_ALERT_PP = -0.5
 
 # GraphRAG: 엔터티 매칭 후 몇 홉까지 이웃 노드를 확장할지.
 GRAPH_RETRIEVAL_HOPS = 2
+
+# 인과 판정: 다이 수율이 동일 공정 노드 평균 대비 이 값(퍼센트포인트) 이하일 때만
+# '수율 저하'로 본다. 측정 잡음 수준의 차이를 인과의 근거로 읽지 않기 위한 하한선.
+CAUSAL_YIELD_DEFICIT_PP = -0.5
