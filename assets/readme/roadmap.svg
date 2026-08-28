@@ -1,0 +1,161 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1200" height="660" viewBox="0 0 1200 660"
+     role="img" aria-labelledby="rm-title rm-desc">
+  <title id="rm-title">실습 로드맵 — 앞으로 여섯 단계</title>
+  <desc id="rm-desc">클론과 경로 설정, 테스트가 끝난 뒤 남은 여섯 단계를 순서대로 보여줍니다. 화면 켜기, 로트 물어보기, 대화 저장, PRD 직접 쓰기, 승인 처리, 점수 내기 순이며, 시작 전에 알아야 할 데이터 함정 세 가지를 함께 표시합니다. 함정은 설비 경보와 수율에 상관이 없다는 점, AI 에이전트 다섯 개 중 두 개만 데이터에 나온다는 점, 인터록과 계측오차와 담당 에이전트가 사실상 하나의 신호라는 점입니다.</desc>
+
+  <rect width="1200" height="660" fill="#0B0D0F"/>
+
+  <!-- ── 머리말 ── -->
+  <g id="masthead">
+    <!-- 자간은 라틴 문자에만 준다. 한글에 letter-spacing을 걸면 글자가 흩어져 읽기 나빠진다. -->
+    <text x="56" y="52" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+          font-size="13" letter-spacing="1.6" fill="#8B93A1">NEXT SIX STEPS<tspan
+          font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif"
+          letter-spacing="0" dx="6">· 실습 로드맵</tspan></text>
+    <text x="56" y="92" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif"
+          font-size="32" font-weight="700" fill="#F3F1EA">앞으로 여섯 단계</text>
+    <text x="56" y="118" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif"
+          font-size="14" fill="#8B93A1">클론 · 경로 설정 · 테스트는 이미 끝났다. 아래 순서대로 한 번씩 해보면 된다.</text>
+
+    <!-- 완료 현황 칩 -->
+    <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif" font-size="11">
+      <rect x="784" y="34" width="104" height="22" rx="11" fill="#14171B" stroke="#2A2F35"/>
+      <text x="836" y="49" text-anchor="middle" fill="#8B93A1">파이프라인 확인</text>
+      <rect x="898" y="34" width="116" height="22" rx="11" fill="#14171B" stroke="#2A2F35"/>
+      <text x="956" y="49" text-anchor="middle" fill="#8B93A1">데이터 6개 표 연결</text>
+      <rect x="1024" y="34" width="120" height="22" rx="11" fill="#14171B" stroke="#2A2F35"/>
+      <text x="1084" y="49" text-anchor="middle" fill="#8B93A1">테스트 28개 통과</text>
+    </g>
+    <line x1="56" y1="140" x2="1144" y2="140" stroke="#2A2F35" stroke-width="1"/>
+  </g>
+
+  <!-- ── 여섯 단계 ──
+       카드 344×136 · 가로 간격 28 · 세로 간격 24 · 열 x=56/428/800 · 행 y=164/324 -->
+  <g id="steps"
+     font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif">
+
+    <!-- 1 -->
+    <g transform="translate(56 164)">
+      <rect width="344" height="136" rx="12" fill="#14171B" stroke="#2A2F35"/>
+      <circle cx="42" cy="40" r="18" fill="none" stroke="#5B8DEF" stroke-width="2"/>
+      <text x="42" y="47" text-anchor="middle" font-size="19" font-weight="700" fill="#5B8DEF">1</text>
+      <text x="76" y="36" font-size="18" font-weight="700" fill="#F3F1EA">화면을 켠다</text>
+      <text x="76" y="58" font-size="13" fill="#8B93A1">브라우저에 채팅 창이 뜬다</text>
+      <rect x="20" y="82" width="304" height="32" rx="5" fill="#0B0D0F"/>
+      <rect x="20" y="82" width="3" height="32" fill="#5B8DEF"/>
+      <text x="34" y="102" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+            font-size="11.5" fill="#D6D0C4">python -m insight_agent.fe.server</text>
+    </g>
+
+    <!-- 2 -->
+    <g transform="translate(428 164)">
+      <rect width="344" height="136" rx="12" fill="#14171B" stroke="#2A2F35"/>
+      <circle cx="42" cy="40" r="18" fill="none" stroke="#5B8DEF" stroke-width="2"/>
+      <text x="42" y="47" text-anchor="middle" font-size="19" font-weight="700" fill="#5B8DEF">2</text>
+      <text x="76" y="36" font-size="18" font-weight="700" fill="#F3F1EA">로트를 물어본다</text>
+      <text x="76" y="58" font-size="13" fill="#8B93A1">여섯 칸이 차례로 켜진다</text>
+      <rect x="20" y="82" width="304" height="32" rx="5" fill="#0B0D0F"/>
+      <rect x="20" y="82" width="3" height="32" fill="#5B8DEF"/>
+      <text x="34" y="102" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+            font-size="11.5" fill="#D6D0C4">LOT-2503-50790</text>
+    </g>
+
+    <!-- 3 -->
+    <g transform="translate(800 164)">
+      <rect width="344" height="136" rx="12" fill="#14171B" stroke="#2A2F35"/>
+      <circle cx="42" cy="40" r="18" fill="none" stroke="#5B8DEF" stroke-width="2"/>
+      <text x="42" y="47" text-anchor="middle" font-size="19" font-weight="700" fill="#5B8DEF">3</text>
+      <text x="76" y="36" font-size="18" font-weight="700" fill="#F3F1EA">대화를 저장한다</text>
+      <text x="76" y="58" font-size="13" fill="#8B93A1">버튼을 눌러야만 생긴다</text>
+      <rect x="20" y="82" width="304" height="32" rx="5" fill="#0B0D0F"/>
+      <rect x="20" y="82" width="3" height="32" fill="#5B8DEF"/>
+      <text x="34" y="102" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+            font-size="11.5" fill="#D6D0C4">outputs/chat_report_*.md</text>
+    </g>
+
+    <!-- 4 -->
+    <g transform="translate(56 324)">
+      <rect width="344" height="136" rx="12" fill="#14171B" stroke="#2A2F35"/>
+      <circle cx="42" cy="40" r="18" fill="none" stroke="#5B8DEF" stroke-width="2"/>
+      <text x="42" y="47" text-anchor="middle" font-size="19" font-weight="700" fill="#5B8DEF">4</text>
+      <text x="76" y="36" font-size="18" font-weight="700" fill="#F3F1EA">PRD를 손으로 쓴다</text>
+      <text x="76" y="58" font-size="13" fill="#8B93A1">자동으로 만들어주지 않는다</text>
+      <rect x="20" y="82" width="304" height="32" rx="5" fill="#0B0D0F"/>
+      <rect x="20" y="82" width="3" height="32" fill="#5B8DEF"/>
+      <text x="34" y="102" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+            font-size="11.5" fill="#D6D0C4">PRD_TEMPLATE.md → docs/prd.md</text>
+    </g>
+
+    <!-- 5 -->
+    <g transform="translate(428 324)">
+      <rect width="344" height="136" rx="12" fill="#14171B" stroke="#2A2F35"/>
+      <circle cx="42" cy="40" r="18" fill="none" stroke="#5B8DEF" stroke-width="2"/>
+      <text x="42" y="47" text-anchor="middle" font-size="19" font-weight="700" fill="#5B8DEF">5</text>
+      <text x="76" y="36" font-size="18" font-weight="700" fill="#F3F1EA">승인을 처리한다</text>
+      <text x="76" y="58" font-size="13" fill="#8B93A1">1,500개 중 128개가 멈춘다</text>
+      <rect x="20" y="82" width="304" height="32" rx="5" fill="#0B0D0F"/>
+      <rect x="20" y="82" width="3" height="32" fill="#5B8DEF"/>
+      <text x="34" y="102" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+            font-size="11.5" fill="#D6D0C4">python -m insight_agent.hitl.cli list</text>
+    </g>
+
+    <!-- 6 -->
+    <g transform="translate(800 324)">
+      <rect width="344" height="136" rx="12" fill="#14171B" stroke="#2A2F35"/>
+      <circle cx="42" cy="40" r="18" fill="none" stroke="#5B8DEF" stroke-width="2"/>
+      <text x="42" y="47" text-anchor="middle" font-size="19" font-weight="700" fill="#5B8DEF">6</text>
+      <text x="76" y="36" font-size="18" font-weight="700" fill="#F3F1EA">점수를 낸다</text>
+      <text x="76" y="58" font-size="13" fill="#8B93A1">정답지와 맞춰본다</text>
+      <rect x="20" y="82" width="304" height="32" rx="5" fill="#0B0D0F"/>
+      <rect x="20" y="82" width="3" height="32" fill="#5B8DEF"/>
+      <text x="34" y="102" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+            font-size="11.5" fill="#D6D0C4">python -m insight_agent.evals.run_eval</text>
+    </g>
+  </g>
+
+  <!-- ── 데이터 함정 ── -->
+  <g id="traps"
+     font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif">
+
+    <text x="56" y="500" font-size="13.5" font-weight="600" letter-spacing="0.4"
+          fill="#D98C33">먼저 알고 시작할 것 · 데이터 함정 셋</text>
+
+    <!-- 함정 1 -->
+    <g transform="translate(56 516)">
+      <rect width="344" height="112" rx="12" fill="#1F1811" stroke="#D98C33" stroke-width="1.5"/>
+      <path d="M32,34 L44,46 L32,58 L20,46 Z" fill="none" stroke="#D98C33" stroke-width="2"/>
+      <circle cx="32" cy="46" r="3.5" fill="#D98C33"/>
+      <text x="60" y="40" font-size="16" font-weight="700" fill="#F3F1EA">원인이 없다</text>
+      <text x="60" y="62" font-size="12.5" fill="#B7BEC9">설비 경보와 수율은 아무 관계가 없다.</text>
+      <text x="60" y="82" font-size="12.5" fill="#B7BEC9">상관 +0.005 — 모른다고 답하는 게 정답.</text>
+    </g>
+
+    <!-- 함정 2 -->
+    <g transform="translate(428 516)">
+      <rect width="344" height="112" rx="12" fill="#1F1811" stroke="#D98C33" stroke-width="1.5"/>
+      <circle cx="24" cy="40" r="5" fill="#D98C33"/>
+      <circle cx="40" cy="40" r="5" fill="#D98C33"/>
+      <circle cx="24" cy="56" r="5" fill="none" stroke="#D98C33" stroke-width="1.5" stroke-dasharray="2 2"/>
+      <circle cx="40" cy="56" r="5" fill="none" stroke="#D98C33" stroke-width="1.5" stroke-dasharray="2 2"/>
+      <circle cx="32" cy="24" r="5" fill="none" stroke="#D98C33" stroke-width="1.5" stroke-dasharray="2 2"/>
+      <text x="60" y="40" font-size="16" font-weight="700" fill="#F3F1EA">에이전트 셋은 비어 있다</text>
+      <text x="60" y="62" font-size="12.5" fill="#B7BEC9">AI 에이전트 5개 중 2개만 나온다.</text>
+      <text x="60" y="82" font-size="12.5" fill="#B7BEC9">나머지 셋에 물으면 빈 답이 온다.</text>
+    </g>
+
+    <!-- 함정 3 -->
+    <g transform="translate(800 516)">
+      <rect width="344" height="112" rx="12" fill="#1F1811" stroke="#D98C33" stroke-width="1.5"/>
+      <g fill="none" stroke="#D98C33" stroke-width="1.8">
+        <path d="M18,30 L30,30 Q38,30 38,40 L44,40"/>
+        <path d="M18,40 L44,40"/>
+        <path d="M18,50 L30,50 Q38,50 38,40 L44,40"/>
+      </g>
+      <circle cx="48" cy="40" r="4" fill="#D98C33"/>
+      <text x="66" y="40" font-size="16" font-weight="700" fill="#F3F1EA">셋이 사실은 하나</text>
+      <text x="66" y="62" font-size="12.5" fill="#B7BEC9">경보 · 계측오차 · 담당 에이전트가</text>
+      <text x="66" y="82" font-size="12.5" fill="#B7BEC9">134건 전부 똑같이 움직인다.</text>
+    </g>
+  </g>
+</svg>

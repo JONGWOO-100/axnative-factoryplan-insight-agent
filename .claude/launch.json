@@ -1,0 +1,14 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "insight-agent-fe",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-c",
+        "from insight_agent.fe.server import serve; serve(port=8900)"
+      ],
+      "port": 8900
+    }
+  ]
+}
